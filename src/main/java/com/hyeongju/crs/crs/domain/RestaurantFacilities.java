@@ -8,6 +8,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "restaurant_facilities")
 @NoArgsConstructor
 public class RestaurantFacilities {
     @Id

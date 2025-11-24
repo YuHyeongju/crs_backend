@@ -20,6 +20,7 @@ public class User {
     // SEQUENCE : DB에 있는 시퀀스를 사용 하는 방법, DB에 미리 시퀀스를 생성해줘야함. 필요할 떄 마다 시퀀스 호출 - 성능 저하
     // TABLE: 시퀀스를 지원하지 않는 DB에서 시퀀스 처럼 사용하고 싶을 때 사용하는 것.
     @Column(name = "USER_IDX") // 컬럼 이름을 명시함. 자바 필드명과 DB컬럼명이 다를 때 사용
+    @OneToMany(fetch = FetchType.LAZY)
     private Integer userIdx;
 
     @Column(name="ID", unique = true , nullable = false, length = 50)

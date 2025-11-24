@@ -8,10 +8,12 @@ import lombok.Setter;
 @Entity
 @Setter
 @Getter
+@Table(name = "congestion_level")
 @NoArgsConstructor
 public class CongestionLevel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @OneToMany(fetch = FetchType.LAZY)
     private int congLevIdx;
 
     @Column(name = "CONG_LEV_NAME",nullable = false,length = 50)
