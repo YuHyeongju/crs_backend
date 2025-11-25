@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor; // 기본 생성자를 생성
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "user") // 실제 db 테이블 이름 지정
@@ -20,8 +22,7 @@ public class User {
     // SEQUENCE : DB에 있는 시퀀스를 사용 하는 방법, DB에 미리 시퀀스를 생성해줘야함. 필요할 떄 마다 시퀀스 호출 - 성능 저하
     // TABLE: 시퀀스를 지원하지 않는 DB에서 시퀀스 처럼 사용하고 싶을 때 사용하는 것.
     @Column(name = "USER_IDX") // 컬럼 이름을 명시함. 자바 필드명과 DB컬럼명이 다를 때 사용
-    @OneToMany(fetch = FetchType.LAZY)
-    private Integer userIdx;
+    private int userIdx;
 
     @Column(name="ID", unique = true , nullable = false, length = 50)
     private String id;
@@ -42,8 +43,9 @@ public class User {
     private String gender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ROLE", referencedColumnName = "ROLE_IDX", nullable = false)
+    @JoinColumn(name = "ROLE_IDX", nullable = false)
     private Role role;
+    // 한 사람은 하나의 역할이 주어진다.
 
     @Column(name="BUSINESS_NUM",length = 200)
     private String businessNum;
@@ -54,5 +56,21 @@ public class User {
     @Column(name= "CREATE_TIME")
     private LocalDateTime createTime;
 
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    private List<BookMark> bookMarks = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    private List<Reward> rewards = new ArrayList<>();
+
+    @OneToMany(mappedBy = "reporter",fetch = FetchType.LAZY)
+    private List<ReviewReport> reviewReports = new ArrayList<>();
+
+    //mappedBy에는 many to one 으로 참조하는 컬럼의 필드 이름을 작성
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Congestion> congestions = new ArrayList<>();
 
 }

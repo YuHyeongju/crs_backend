@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -16,19 +18,15 @@ public class Congestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "CONG_IDX")
     private int congIdx;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "REST_IDX",referencedColumnName = "REST_IDX",nullable = false)
-    private int restIdx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_IDX",referencedColumnName = "USER_IDX",nullable = false)
-    private int userIdx;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CONG_LEVEL",referencedColumnName = "CONG_LEV_IDX",nullable = false)
-    private int congLevel;
+    @JoinColumn(name = "CONG_LEVEL", nullable = false)
+    private CongestionLevel congLevel;
+    // 외래키를 참조하는 필드는 참조 대상의 엔티티 타입으로 선언해야함.
+    // ID 값 매핑에서 엔티티 객체 매핑으로 되었기에 referencedColumnName는 필요 없어짐.
 
     @Column(name = "CONG_AT",nullable = false)
     private LocalDateTime congAt;
@@ -41,5 +39,14 @@ public class Congestion {
 
     @Column(name = "CONG_HIDDEN_AT")
     private LocalDateTime congHiddenAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_IDX",nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REST_IDX",nullable = false)
+    private Restaurant restaurant;
+
 
 }

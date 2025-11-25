@@ -10,7 +10,13 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "bookmark")
+@Table(name = "bookmark", uniqueConstraints = { // 복합 유니크 제약 조건 추가
+        @UniqueConstraint(
+                name = "UK_USER_RESTAURANT",
+                columnNames = {"USER_IDX","REST_IDX"} // 두 컬럼의 조합이 유일해야함.
+                // 한 유저가 한 식당에 여러 번 북마크를 할 수 없다.
+        )
+})
 @NoArgsConstructor
 public class BookMark {
 
@@ -18,14 +24,14 @@ public class BookMark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int bookMarkIdx;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_IDX",referencedColumnName = "USER_IDX",nullable = false,unique = true)
-    private int userIdx;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "REST_IDX",referencedColumnName = "REST_IDX",nullable = false,unique = true)
-    private int restIdx;
-
     @Column(name = "BOOKMARKED_AT",nullable = false)
     private LocalDateTime bookMarkedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_IDX",nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REST_IDX",nullable = false)
+    private Restaurant restaurant;
 }

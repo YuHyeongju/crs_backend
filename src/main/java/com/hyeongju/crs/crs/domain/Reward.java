@@ -20,8 +20,8 @@ public class Reward {
     private int rewardIdx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_IDX",referencedColumnName = "USER_IDX",nullable = false)
-    private int userIdx;
+    @JoinColumn(name = "USER_IDX",nullable = false)
+    private User user;
 
     @Column(name = "TOTAL_REWARD_VALUE",nullable = false)
     private int totalRewardValue;

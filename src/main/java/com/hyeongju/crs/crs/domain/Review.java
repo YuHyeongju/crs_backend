@@ -18,18 +18,10 @@ public class Review {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int reviewIdx;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "USER_IDX",referencedColumnName = "USER_IDX",nullable = false)
-    private int userIdx;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "REST_IDX",referencedColumnName = "REST_IDX",nullable = false)
-    private int restIdx;
-
     @Column(name = "RATING",nullable = false)
     private int rating;
 
-    @Column(name = "RATING",length = 2000,nullable = false)
+    @Column(name = "CONTENT",length = 2000,nullable = false)
     private String content;
 
     @Column(name = "REVIEW_AT",nullable = false)
@@ -40,6 +32,14 @@ public class Review {
 
     @Column(name = "REVIEW_DELETE_AT")
     private LocalDateTime reviewDeleteAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_IDX",nullable = false)
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REST_IDX",nullable = false)
+    private Restaurant restaurant;
 
 
 }

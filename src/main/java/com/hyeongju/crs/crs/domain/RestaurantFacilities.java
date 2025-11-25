@@ -16,10 +16,6 @@ public class RestaurantFacilities {
     @Column(name="FACILITIES_IDX")
     private int facilitiesIdx;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "REST_IDX", referencedColumnName = "REST_IDX",nullable = false)
-    private int restIdx;
-
     @Column(name="WIFI", nullable = false)
     private boolean wifi;
 
@@ -27,9 +23,9 @@ public class RestaurantFacilities {
     private boolean restRoom;
 
     @Column(name="PARKING_AVAILABLE",nullable = false)
-    private boolean parkingAvailAble;
+    private boolean parkingAvailable;
 
-    @Column(name="PACKING_POSSIABLE",nullable = false)
+    @Column(name="PACKING_POSSIBLE",nullable = false)
     private boolean packingPossible;
 
     @Column(name="KAKAOPAY",nullable = false)
@@ -40,5 +36,9 @@ public class RestaurantFacilities {
 
     @Column(name = "KIOSK", nullable = false)
     private boolean kiosk;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REST_IDX",nullable = false)
+    private Restaurant restaurant;
 
 }
