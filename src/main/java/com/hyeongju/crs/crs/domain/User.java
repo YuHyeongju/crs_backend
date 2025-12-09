@@ -27,7 +27,7 @@ public class User {
     @Column(name="ID", unique = true , nullable = false, length = 50)
     private String id;
 
-    @Column(name = "PW", nullable = false , length = 100)
+    @Column(name = "PW", nullable = false , length = 255)
     private String pw;
 
     @Column(name ="EMAIL", nullable = false, length = 200)
@@ -68,8 +68,9 @@ public class User {
     @OneToMany(mappedBy = "reporter",fetch = FetchType.LAZY)
     private List<ReviewReport> reviewReports = new ArrayList<>();
 
-    //mappedBy에는 many to one 으로 참조하는 컬럼의 필드 이름을 작성
-
+    // mappedBy에는 many to one 으로 참조하는 컬럼의 필드 이름을 작성
+    // 내 주인은 저 컬럼 입니다를 알려주는 것.
+    // 이 리스트를 채우려면 Congestion 테이블에 있는 user 필드가 가르키는 외래키를 조회해라
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Congestion> congestions = new ArrayList<>();
 
