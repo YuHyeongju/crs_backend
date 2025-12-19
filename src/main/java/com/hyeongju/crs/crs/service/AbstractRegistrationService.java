@@ -42,7 +42,7 @@ public abstract class AbstractRegistrationService {
         newUser.setPw(encodedPassword);
         newUser.setEmail(dto.getEmail());
         newUser.setName(dto.getName());
-        newUser.setPNum(dto.getPhone());
+        newUser.setPhNum(dto.getPhone());
         newUser.setGender(dto.getGender());
 
         // 서버에서 생성한 데이터

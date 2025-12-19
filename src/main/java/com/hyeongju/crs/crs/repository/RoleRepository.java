@@ -10,5 +10,6 @@ public interface RoleRepository extends JpaRepository<Role, Integer> {
     // JPA가 SQL 자동 생성
     // 사용자에게 부여할 역할이 무엇인지 판단하는 코드
     Optional<Role> findByRoleName(String roleName);
-    
+
+
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor; // 기본 생성자를 생성
 import lombok.Setter;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -37,12 +38,12 @@ public class User {
     private String name;
 
     @Column(name ="PNUM", unique = true, nullable = false , length = 100)
-    private String pNum;
+    private String phNum;
 
     @Column(name="GENDER", nullable = false, length = 100)
     private String gender;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "ROLE_IDX", nullable = false)
     private Role role;
     // 한 사람은 하나의 역할이 주어진다.
