@@ -6,6 +6,7 @@ import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.BaseRegistrationDto;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -19,6 +20,7 @@ public abstract class AbstractRegistrationService {
     protected final RoleRepository roleRepository;
     protected final PasswordEncoder passwordEncoder;
 
+    @Transactional
     protected User registerCommonFields(BaseRegistrationDto dto, RoleName roleName) {
 
         // 1. 공통 유효성 검증
@@ -30,8 +32,12 @@ public abstract class AbstractRegistrationService {
         }
 
         // 2. 역할(Role) 조회
-        Role defaultRole = roleRepository.findByRoleName(roleName.name())
-                .orElseThrow(() -> new IllegalStateException("기본 역할(" + roleName.name() + ")이 DB에 존재하지 않습니다."));
+        Role defaultRole = roleRepository.findByRoleName(roleName)
+                .orElseGet(() -> {
+                        Role newRole = new Role();
+                        newRole.setRoleName(roleName);
+                  return roleRepository.save(newRole);
+                }); // DB에 Role 테이블에 roleName이 없다면 생성해서 저장함.
 
         // 3. 비밀번호 원문을 가져다가 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPw());

@@ -35,7 +35,7 @@ public class MerchantRegistractionDto implements BaseRegistrationDto{
     private String email;
 
     @NotBlank(message = "전호번호는 필수 입력 값입니다.")
-    @Pattern(regexp = "01(?:0|1|[2-9])-(?:\\\\d{3}|\\\\d{4})-\\\\d{4}$",message = "올바른 전화번호 형식이 아닙니다.")
+    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$",message = "올바른 전화번호 형식이 아닙니다.")
     private String phone;
 
     @NotBlank(message = "성별은 필수 입력 값입니다.")

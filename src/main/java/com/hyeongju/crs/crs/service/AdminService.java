@@ -27,7 +27,7 @@ public class AdminService extends AbstractRegistrationService {
             throw new IllegalArgumentException("유효하지 않은 관리자 코드 입니다.");
         }
 
-        User newUser = super.registerCommonFields(dto, RoleName.Role_ADMIN);
+        User newUser = super.registerCommonFields(dto, RoleName.ADMIN);
 
         newUser.setAdminNum(dto.getAdminNum());
 

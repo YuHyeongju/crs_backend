@@ -6,6 +6,8 @@ import com.hyeongju.crs.crs.dto.UserLoginDto;
 import com.hyeongju.crs.crs.dto.UserRegistractionDto;
 import com.hyeongju.crs.crs.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/user")
-    public ResponseEntity<String> registerUser(@RequestBody UserRegistractionDto registractionDto){
+    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistractionDto registractionDto){
         // ID 중복 체크
         if(authService.existsById(registractionDto.getId())){
             return new ResponseEntity<>("이미 존재하는 ID 입니다.",HttpStatus.BAD_REQUEST);
@@ -41,7 +43,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/merchant")
-    public ResponseEntity<String> registerMerchant(@RequestBody MerchantRegistractionDto registractionDto){
+    public ResponseEntity<String> registerMerchant(@Valid @RequestBody MerchantRegistractionDto registractionDto){
         // ID 중복 체크
         if(authService.existsById(registractionDto.getId())){
             return new ResponseEntity<>("이미 존재하는 ID 입니다.",HttpStatus.BAD_REQUEST);
@@ -67,7 +69,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@RequestBody AdminRegistractionDto registractionDto){
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistractionDto registractionDto){
         // ID 중복 체크
         if(authService.existsById(registractionDto.getId())){
             return new ResponseEntity<>("이미 존재하는 ID입니다.",HttpStatus.BAD_REQUEST);
@@ -98,10 +100,14 @@ public class AuthController {
         try {
             authService.authenticate(loginDto.getId(), loginDto.getPw());
 
+            System.out.println("로그인 성공");
+
             return ResponseEntity.ok("로그인 성공");
+
 
         } catch (RuntimeException e) {
             // 인증 실패
+            System.out.println("로그인 실패");
             return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
         }
     }
@@ -110,12 +116,21 @@ public class AuthController {
     public ResponseEntity<String> logoutUser(HttpServletRequest request){
         authService.logout(request);
 
+        System.out.println("로그아웃 성공");
+        
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(@RequestParam String id, HttpServletRequest request){
-        authService.withdraw(id, request);
+        authService.withdraw(id);
+
+        HttpSession session = request.getSession(false);
+
+        if(session != null){
+            session.invalidate();
+        }
+
         return ResponseEntity.ok("회원 탈퇴가 완료 되었습니다.");
     }
 

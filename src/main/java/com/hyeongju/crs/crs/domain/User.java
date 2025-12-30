@@ -43,7 +43,7 @@ public class User {
     @Column(name="GENDER", nullable = false, length = 100)
     private String gender;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ROLE_IDX", nullable = false)
     private Role role;
     // 한 사람은 하나의 역할이 주어진다.

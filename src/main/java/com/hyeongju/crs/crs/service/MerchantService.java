@@ -27,8 +27,7 @@ public class MerchantService extends AbstractRegistrationService {
             throw new IllegalArgumentException("유효하지 않은 사업자 등록번호 입니다.");
         }
 
-
-        User newUser = super.registerCommonFields(dto, RoleName.Role_MERCHANT);
+        User newUser = super.registerCommonFields(dto, RoleName.MERCHANT);
 
         newUser.setBusinessNum(dto.getBusinessNum());
 

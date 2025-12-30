@@ -1,6 +1,7 @@
 package com.hyeongju.crs.crs.service;
 
 import com.hyeongju.crs.crs.domain.Role;
+import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
@@ -39,10 +40,14 @@ public class AuthService {
         return userRepository.existsByAdminNum(adminNum);
     }
 
-    private Role getRoleByName(String name){
-        return roleRepository.findByRoleName(name).orElseThrow(
-                () -> new RuntimeException(name + "권한이 DB에 없습니다.")
-        );
+
+    private Role getRoleByName(RoleName roleName) {
+        return roleRepository.findByRoleName(roleName)
+                .orElseGet(() -> {
+                    Role newRole = new Role();
+                    newRole.setRoleName(roleName);
+                    return roleRepository.save(newRole);
+                });
     }
 
     @Transactional // 트랜잭션 단위 관리를 스프링이 대신하게 지시
@@ -61,7 +66,7 @@ public class AuthService {
 
         user.setCreateTime(LocalDateTime.now()); // 생성 시간
 
-        user.setRole(getRoleByName("USER"));// 역할
+        user.setRole(getRoleByName(RoleName.USER));// 역할
 
         userRepository.save(user);
 
@@ -84,7 +89,7 @@ public class AuthService {
 
         user.setCreateTime(LocalDateTime.now()); // 생성 시간
 
-        user.setRole(getRoleByName("MERCHANT")); // 역할
+        user.setRole(getRoleByName(RoleName.MERCHANT)); // 역할
 
         userRepository.save(user);
     }
@@ -106,7 +111,7 @@ public class AuthService {
 
         user.setCreateTime(LocalDateTime.now()); // 생성 시간
 
-        user.setRole(getRoleByName("ADMIN"));
+        user.setRole(getRoleByName(RoleName.ADMIN));
 
         userRepository.save(user);
     }
@@ -134,18 +139,14 @@ public class AuthService {
     }
 
     @Transactional // 회원 탈퇴시에 DB에서 정보 삭제와 세션 삭제가 동시에 이루어져야함.
-    public void withdraw(String id,HttpServletRequest request){
-        //1. DB에서 사용자 삭제
+    public void withdraw(String id){
+        // DB에서 사용자 삭제
         if(userRepository.existsById(id)){
             userRepository.deleteById(id);
         }else{
             throw new RuntimeException("존재하지 않는 사용자 입니다.");
         }
-        //2. 로그아웃 처리
-        HttpSession session = request.getSession(false);
-        if(session != null){
-            session.invalidate();
-        }
+
     }
 
 

@@ -19,8 +19,9 @@ public class Role {
     @Column(name="ROLE_IDX")
     private int roleIdx;
 
+    @Enumerated(EnumType.STRING) // 열거형을 DB에 어떤 형태로 저장할지 지정
     @Column(name="ROLE_NAME", nullable = false,length = 100)
-    private String roleName;
+    private RoleName roleName;
 
     @OneToMany(mappedBy = "role",fetch = FetchType.LAZY)
     private List<User> users = new ArrayList<>();

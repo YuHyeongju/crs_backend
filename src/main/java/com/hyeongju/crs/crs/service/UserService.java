@@ -2,6 +2,7 @@ package com.hyeongju.crs.crs.service;
 
 import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.dto.UserRegistractionDto;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
@@ -23,9 +24,27 @@ public class UserService extends AbstractRegistrationService {
     @Transactional // 트랜잭션에 오류가 발생하면 작업이 취소되고 롤백되고 변경사항이 취소됨
     public User registerUser(UserRegistractionDto dto){
         // 부모한테서 registerCommonFields 호출
-        User newUser = super.registerCommonFields(dto, RoleName.Role_USER);
+        User newUser = super.registerCommonFields(dto, RoleName.USER);
 
         return userRepository.save(newUser);
+    }
+
+    public MypageResponseDto getMyProfile(String id){
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
+
+        MypageResponseDto dto = new MypageResponseDto();
+
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setGender(user.getGender());
+        dto.setRole(user.getRole().getRoleName().name());
+        dto.setPhNum(user.getPhNum());
+        dto.setBusinessNum(user.getBusinessNum());
+        dto.setAdminNum(user.getAdminNum());
+
+        return dto;
     }
 
 }
