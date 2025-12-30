@@ -96,13 +96,20 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody UserLoginDto loginDto){
+    public ResponseEntity<String> authenticateUser(@RequestBody UserLoginDto loginDto, HttpServletRequest request){
         try {
             authService.authenticate(loginDto.getId(), loginDto.getPw());
 
+            HttpSession session = request.getSession();
+            session.setAttribute("id",loginDto.getId());
+
             System.out.println("로그인 성공");
 
+
+
             return ResponseEntity.ok("로그인 성공");
+
+
 
 
         } catch (RuntimeException e) {

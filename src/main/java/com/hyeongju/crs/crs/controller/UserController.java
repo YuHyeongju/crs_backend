@@ -23,14 +23,16 @@ public class UserController {
     public ResponseEntity<?> getMyProfile(HttpServletRequest request){
         HttpSession session = request.getSession(false);
 
-        if(session == null || request.getAttribute("id") == null){
+        if(session == null || session.getAttribute("id") == null){
+            // request.getAttribute는 들어온 요청에서 id를 찾는것
+            // session.getAttribute는 로그인 할 때 서버가 저장해둔 세션에서 찾는 것.
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 만료되었습니다.");
         }
 
         String id = (String)session.getAttribute("id");
 
         try {
-            MypageResponseDto dto = userService.getMyProfile("id");
+            MypageResponseDto dto = userService.getMyProfile(id);
 
             return ResponseEntity.ok(dto);
         }catch (RuntimeException e){
