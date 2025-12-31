@@ -129,16 +129,24 @@ public class AuthController {
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<String> withdraw(@RequestParam String id, HttpServletRequest request){
-        authService.withdraw(id);
+    public ResponseEntity<String> withdraw(@RequestParam("id") String id, HttpServletRequest request){
+        try{  // 이름을 명시해줘야함.
+            authService.withdraw(id);
 
-        HttpSession session = request.getSession(false);
+            HttpSession session = request.getSession(false);
 
-        if(session != null){
-            session.invalidate();
+            if(session != null){
+                session.invalidate();
+            }
+
+            System.out.println("회원 탈퇴 성공");
+
+            return ResponseEntity.ok("회원 탈퇴가 완료 되었습니다.");
+
+        } catch (Exception e) {
+            System.out.println("회원탈퇴 실패");
+            return new ResponseEntity<> (e.getMessage(),HttpStatus.UNAUTHORIZED);
         }
-
-        return ResponseEntity.ok("회원 탈퇴가 완료 되었습니다.");
     }
 
 }

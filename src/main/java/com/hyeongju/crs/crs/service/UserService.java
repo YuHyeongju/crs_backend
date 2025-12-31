@@ -2,8 +2,7 @@ package com.hyeongju.crs.crs.service;
 
 import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
-import com.hyeongju.crs.crs.dto.MypageResponseDto;
-import com.hyeongju.crs.crs.dto.UserRegistractionDto;
+import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -46,5 +45,49 @@ public class UserService extends AbstractRegistrationService {
 
         return dto;
     }
+
+    @Transactional
+    public void updateUserProfile(String id, UserUpdateDto dto){
+        User user = userRepository.findById(id).orElseThrow(()->
+                new IllegalStateException("존재하지 않는 사용자 입니다."));
+
+        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()){ //
+            //비밀번호가 null이 아닐경우와 공백이 아닐경우
+            user.setPw(passwordEncoder.encode(dto.getPw()));
+        }
+
+        user.setPhNum(dto.getPhNum());
+        user.setEmail(dto.getEmail());
+    }
+
+    @Transactional
+    public void updateMerchantProfile(String id, MerchantUpdateDto dto){
+        User user = userRepository.findById(id).orElseThrow(()->
+                new IllegalStateException("존재하지 않는 사용자 입니다."));
+
+        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
+            user.setPw(passwordEncoder.encode(dto.getPw()));
+        }
+
+        user.setPhNum(dto.getPhNum());
+        user.setEmail(dto.getEmail());
+        user.setBusinessNum(dto.getBusinessNum());
+    }
+
+    @Transactional
+    public void updateAdminProfile(String id, AdminUpdateDto dto){
+        User user = userRepository.findById(id).orElseThrow(()->
+                new IllegalStateException("존재하지 않는 사용자 입니다."));
+
+        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
+            user.setPw(passwordEncoder.encode(dto.getPw()));
+        }
+
+        user.setPhNum(dto.getPhNum());
+        user.setEmail(dto.getEmail());
+        user.setAdminNum(dto.getAdminNum());
+    }
+
+
 
 }
