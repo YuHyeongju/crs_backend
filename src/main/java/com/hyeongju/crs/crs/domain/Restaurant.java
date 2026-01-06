@@ -52,4 +52,7 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
     private List<Congestion> congestions = new ArrayList<>();
 
+    @Column(name = "KAKAO_ID", unique = true, nullable = false)
+    private String kakaoId  ;
+
 }
