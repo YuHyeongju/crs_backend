@@ -23,7 +23,8 @@ public class RestaurantController {
         Restaurant restaurant = restaurantService.getOrCreateRestaurant(
                 dto.getKakaoId(),
                 dto.getRestName(),
-                dto.getRestAddress()
+                dto.getRestAddress(),
+                dto.getRestTel()
         );
         return ResponseEntity.ok(restaurant);
     }

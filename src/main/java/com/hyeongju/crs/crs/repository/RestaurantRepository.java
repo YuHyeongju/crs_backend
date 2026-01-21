@@ -11,5 +11,5 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
 
     Optional <Restaurant> findByKakaoId(String kakaoId);
 
-    // save, findById, existsById, deleteById 등은 상속받아서 이미 구현되 있음.
+
 }

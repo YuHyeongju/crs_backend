@@ -6,8 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Entity
 @Getter
@@ -21,12 +20,9 @@ public class Congestion {
     @Column(name = "CONG_IDX")
     private int congIdx;
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CONG_LEVEL", nullable = false)
-    private CongestionLevel congLevel;
-    // 외래키를 참조하는 필드는 참조 대상의 엔티티 타입으로 선언해야함.
-    // ID 값 매핑에서 엔티티 객체 매핑으로 되었기에 referencedColumnName는 필요 없어짐.
+    @Enumerated(EnumType.STRING) // DB에 혼잡도 상태를 문자열로 저장
+    @Column(name = "CONG_Status")
+    private CongestionStatus congStatus;
 
     @Column(name = "CONG_AT",nullable = false)
     private LocalDateTime congAt;

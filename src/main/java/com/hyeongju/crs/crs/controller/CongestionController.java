@@ -1,0 +1,45 @@
+package com.hyeongju.crs.crs.controller;
+
+import com.hyeongju.crs.crs.dto.CongestionUpdateDto;
+import com.hyeongju.crs.crs.service.CongestionService;
+import lombok.Builder;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/congestion")
+@RequiredArgsConstructor
+@Builder // 빌더 패턴을 사용할 수 있게 해줌
+
+public class CongestionController {
+
+    private final CongestionService congestionService;
+
+    @GetMapping("/{kakaoId}")
+    public ResponseEntity<String> getCurrentCongestion(@PathVariable("kakaoId") String kakaoId){
+        String currentStatus = congestionService.getCurrentcongestion(kakaoId);
+        System.out.println("===================================================");
+        System.out.println("단일 가게 혼잡도 조회 완료");
+        System.out.println("===================================================");
+        return ResponseEntity.ok(currentStatus);
+    }
+
+    @PostMapping("/bulkStatus")
+    public ResponseEntity<Map<String, String>> getCurrentCongstionAll(@RequestBody List<String> kakaoIds){
+        System.out.println("==========================================================");
+        System.out.println("전체 가게 혼잡도 조회 완료 ");
+        System.out.println("==========================================================");
+        return ResponseEntity.ok(congestionService.getAllCurrentCongestion(kakaoIds));
+    }
+
+    @PostMapping("/updateStatus")
+    public ResponseEntity<Void> updateCongestion(@RequestBody CongestionUpdateDto dto){
+        System.out.println("전달 받은 식당 ID: " + dto.getRestIdx());
+        System.out.println("전달 받은 혼잡도 ID " + dto.getCongLevIdx());
+        congestionService.changeCongLev(dto);
+        return ResponseEntity.ok().build();
+    }
+}
