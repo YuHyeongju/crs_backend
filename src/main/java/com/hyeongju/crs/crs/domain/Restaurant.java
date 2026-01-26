@@ -22,20 +22,20 @@ public class Restaurant {
     @Column(name = "REST_NAME", nullable = false, length = 100)
     private String restName;
 
-    @Column(name = "REST_TEL", unique = true, nullable = false, length = 200)
+    @Column(name = "REST_TEL", unique = true,length = 200)
     private String restTel;
 
     @Column(name = "REST_ADDRESS", nullable = false)
     private String restAddress;
 
-    @Column(name = "REST_BUSI_HOURS", nullable = false, length = 100)
+    @Column(name = "REST_BUSI_HOURS", length = 100 )
     private String restBusiHours;
 
-    @Column(name = "REST_MENU", nullable = false, length = 100)
+    @Column(name = "REST_MENU", length = 100)
     private String restMenu;
 
-    @Column(name = "REST_PRICE", nullable = false)
-    private int restPrice;
+    @Column(name = "REST_PRICE")
+    private Integer restPrice;
 
     @Column(name = "REST_MENU_PICT", length = 500)
     private String restMenuPict;
@@ -54,5 +54,9 @@ public class Restaurant {
 
     @Column(name = "KAKAO_ID", unique = true, nullable = false)
     private String kakaoId  ;
+
+    @Column(nullable = false)
+    private String status = "TEMP";
+
 
 }

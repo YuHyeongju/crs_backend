@@ -10,7 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CongestionUpdateDto {
-
-    private String restIdx;
-    private Integer congLevIdx;
+    private int userIdx;
+    private String kakaoId;
+    private String congStatus;
+    private String restName;
+    private String restAddress;
+    private String restPhone;
 }

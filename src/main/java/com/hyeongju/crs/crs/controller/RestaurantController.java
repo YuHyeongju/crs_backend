@@ -24,7 +24,7 @@ public class RestaurantController {
                 dto.getKakaoId(),
                 dto.getRestName(),
                 dto.getRestAddress(),
-                dto.getRestTel()
+                dto.getRestPhone()
         );
         return ResponseEntity.ok(restaurant);
     }

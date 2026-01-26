@@ -10,5 +10,5 @@ public class RestaurantRequestDto {
     private String kakaoId;
     private String restName;
     private String restAddress;
-    private String RestTel;
+    private String RestPhone;
 }

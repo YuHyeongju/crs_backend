@@ -1,5 +1,4 @@
 package com.hyeongju.crs.crs.controller;
-
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
 import com.hyeongju.crs.crs.dto.UserLoginDto;
@@ -12,6 +11,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.hyeongju.crs.crs.domain.User;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor //final 생성자 자동 생성
@@ -96,21 +100,21 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody UserLoginDto loginDto, HttpServletRequest request){
+    public ResponseEntity<?> authenticateUser(@RequestBody UserLoginDto loginDto, HttpServletRequest request){
         try {
-            authService.authenticate(loginDto.getId(), loginDto.getPw());
+            User user = authService.authenticate(loginDto.getId(), loginDto.getPw());
 
             HttpSession session = request.getSession();
-            session.setAttribute("id",loginDto.getId());
+            session.setAttribute("id",user.getId());
 
-            System.out.println("로그인 성공");
+            //프론트가 필요한 정보 전달
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("userIdx",user.getUserIdx());
+            responseData.put("role",user.getRole().getRoleName().name());
+            responseData.put("name",user.getName());
+            responseData.put("message","로그인 성공");
 
-
-
-            return ResponseEntity.ok("로그인 성공");
-
-
-
+            return ResponseEntity.ok(responseData);
 
         } catch (RuntimeException e) {
             // 인증 실패

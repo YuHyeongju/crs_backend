@@ -5,9 +5,11 @@ import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.dto.CongestionUpdateDto;
 import com.hyeongju.crs.crs.repository.CongestionRepository;
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
+import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import com.hyeongju.crs.crs.domain.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,33 +21,30 @@ import java.util.Map;
 public class CongestionService {
     private final RestaurantRepository restaurantRepository;
     private final CongestionRepository congestionRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public void changeCongLev(CongestionUpdateDto dto){
-
-        System.out.println("전달받은 DTO 내용: " + dto.toString());
-        System.out.println("조회하려는 식당 IDX:" + dto.getRestIdx());
-        if (dto.getCongLevIdx() == null) {
-            throw new IllegalArgumentException("혼잡도 레벨 ID(congLevIdx)가 전달되지 않았습니다.");
-        }
-
-        CongestionStatus newStatus = CongestionStatus.convertIdx(dto.getCongLevIdx());
-
-        Restaurant restaurant = restaurantRepository.findByKakaoId(dto.getRestIdx())
+    public void changeCongStatus(CongestionUpdateDto dto){
+        Restaurant restaurant = restaurantRepository.findByKakaoId(dto.getKakaoId())
                 .orElseGet(()-> {
-                    System.out.println("새로운 식당(KakaoId: " + dto.getRestIdx() + ")을 등록 합니다.");
-                    Restaurant newRestaurant = new Restaurant();
-                    newRestaurant.setKakaoId(dto.getRestIdx());
-                    return restaurantRepository.save(newRestaurant);
-                });
+                            Restaurant newRest = new Restaurant();
+                            newRest.setKakaoId(dto.getKakaoId());
+                            newRest.setRestName(dto.getRestName());
+                            newRest.setRestAddress(dto.getRestAddress());
+                            newRest.setRestTel(dto.getRestPhone());
+                            return restaurantRepository.save(newRest);
+                        });
+
+        User user = userRepository.findById(dto.getUserIdx())
+                .orElseThrow(() -> new IllegalStateException("해당하는 유저가 없음"));
 
         Congestion congestion = new Congestion();
         congestion.setRestaurant(restaurant);
-        congestion.setCongStatus(newStatus);
+        congestion.setUser(user);
+        congestion.setCongStatus(CongestionStatus.valueOf(dto.getCongStatus()));
 
         congestionRepository.save(congestion);
 
-        System.out.println("변환된 혼잡도 상태:" + newStatus.getName());
     }
 
 

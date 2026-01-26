@@ -37,9 +37,13 @@ public class CongestionController {
 
     @PostMapping("/updateStatus")
     public ResponseEntity<Void> updateCongestion(@RequestBody CongestionUpdateDto dto){
-        System.out.println("전달 받은 식당 ID: " + dto.getRestIdx());
-        System.out.println("전달 받은 혼잡도 ID " + dto.getCongLevIdx());
-        congestionService.changeCongLev(dto);
+        System.out.println("전달 받은 카카오 ID: " + dto.getKakaoId());
+        System.out.println("전달 받은 혼잡도 상태: " + dto.getCongStatus());
+        System.out.println("전달 받은 userIdx: " + dto.getUserIdx());
+        System.out.println("전달 받은 식당 이름: " + dto.getRestName());
+        System.out.println("전달 받은 식당 주소: " + dto.getRestAddress());
+        System.out.println("전달 받은 식당 전화번호: " + dto.getRestPhone());
+        congestionService.changeCongStatus(dto);
         return ResponseEntity.ok().build();
     }
 }

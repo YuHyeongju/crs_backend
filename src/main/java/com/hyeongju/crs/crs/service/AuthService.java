@@ -117,7 +117,7 @@ public class AuthService {
     }
 
     // 로그인 인증 메서드
-    public void authenticate(String id, String rawPassword){
+    public User authenticate(String id, String rawPassword){
         // rawPassword = 암호화되지않은 사용자가입력한 패스워드
         User user = userRepository.findById(id)
                 .orElseThrow(()-> new RuntimeException("존재하지 않는 사용자 ID 입니다."));
@@ -127,7 +127,7 @@ public class AuthService {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
             // 예외 강제 발생
         }
-
+        return user;
     }
 
     public void logout(HttpServletRequest request){
