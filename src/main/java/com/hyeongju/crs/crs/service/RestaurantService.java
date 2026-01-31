@@ -20,9 +20,7 @@ public class RestaurantService {
             newRestaurant.setRestName(restName);
             newRestaurant.setRestAddress(restAddress);
             newRestaurant.setRestTel(restTel);
-
             return restaurantRepository.save(newRestaurant);
-
         });
     }
 
