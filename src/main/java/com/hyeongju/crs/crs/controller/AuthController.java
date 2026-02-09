@@ -106,6 +106,7 @@ public class AuthController {
 
             HttpSession session = request.getSession();
             session.setAttribute("id",user.getId());
+            session.setAttribute("userIdx",user.getUserIdx());
 
             //프론트가 필요한 정보 전달
             Map<String, Object> responseData = new HashMap<>();

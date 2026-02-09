@@ -3,6 +3,7 @@ import com.hyeongju.crs.crs.domain.Congestion;
 import com.hyeongju.crs.crs.domain.CongestionStatus;
 import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.dto.CongestionUpdateDto;
+import com.hyeongju.crs.crs.dto.MyCongestionResponseDto;
 import com.hyeongju.crs.crs.repository.CongestionRepository;
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
@@ -14,6 +15,7 @@ import com.hyeongju.crs.crs.domain.User;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -80,6 +82,17 @@ public class CongestionService {
             resultMap.put(id, status);
         }
         return resultMap;
+    }
+
+    public List<MyCongestionResponseDto>  getMyCongestionHistory(int userIdx){
+        List<Congestion> history = congestionRepository.findByUserUserIdxOrderByCongAtDesc(userIdx);
+
+        return history.stream().map(c -> new MyCongestionResponseDto(
+                c.getCongIdx(),
+                c.getRestaurant().getRestName(),
+                c.getCongStatus().getName(),
+                c.getCongAt()
+        )).collect(Collectors.toList());
     }
 
 }

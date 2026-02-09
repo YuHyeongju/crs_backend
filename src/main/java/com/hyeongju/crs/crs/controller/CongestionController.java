@@ -1,9 +1,13 @@
 package com.hyeongju.crs.crs.controller;
 
+import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.CongestionUpdateDto;
+import com.hyeongju.crs.crs.dto.MyCongestionResponseDto;
 import com.hyeongju.crs.crs.service.CongestionService;
+import jakarta.servlet.http.HttpSession;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -45,5 +49,19 @@ public class CongestionController {
         System.out.println("전달 받은 식당 전화번호: " + dto.getRestPhone());
         congestionService.changeCongStatus(dto);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(HttpSession session){
+        Integer userIdx= (Integer)session.getAttribute("userIdx");
+
+        if(userIdx == null){
+            System.out.println("세션에 userIdx가 없습니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<MyCongestionResponseDto> result = congestionService.getMyCongestionHistory(userIdx);
+        return ResponseEntity.ok(result);
+
     }
 }
