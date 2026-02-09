@@ -10,7 +10,8 @@ public enum CongestionStatus {
     FREE(1, "여유"),
     NORMAL(2,"보통"),
     BUSY(3,"혼잡"),
-    VERY_BUSY(4,"매우 혼잡");
+    VERY_BUSY(4,"매우 혼잡"),
+    NONE(0,"혼잡도 이력 없음");
 
     private final int idx;
     private final String name;
@@ -22,6 +23,6 @@ public enum CongestionStatus {
                 return status;
             }
         }
-        return NORMAL;
+        return NONE;
     }
 }

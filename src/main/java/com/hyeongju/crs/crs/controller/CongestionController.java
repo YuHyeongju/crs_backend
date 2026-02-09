@@ -48,6 +48,7 @@ public class CongestionController {
         System.out.println("전달 받은 식당 주소: " + dto.getRestAddress());
         System.out.println("전달 받은 식당 전화번호: " + dto.getRestPhone());
         congestionService.changeCongStatus(dto);
+        System.out.println("혼잡도 상태 업데이트 완료");
         return ResponseEntity.ok().build();
     }
 

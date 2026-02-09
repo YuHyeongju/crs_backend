@@ -58,13 +58,13 @@ public class CongestionService {
                         List< Congestion > history = r.getCongestions();
                         // 혼잡도 이력 없음
                         if(history == null || history.isEmpty()){
-                            return "혼잡도 이력 없음";
+                            return "null";
                         }
                         // 마지막 혼잡도 이력 가져와서 보여줌
                         Congestion lastCong = history.get(history.size() -1);
                         return lastCong.getCongStatus().getName();
 
-                }).orElse("식당 정보 없음");
+                }).orElse("null");
 
 
     }
