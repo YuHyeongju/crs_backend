@@ -3,6 +3,7 @@ package com.hyeongju.crs.crs.service;
 import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
+import com.hyeongju.crs.crs.dto.MerchantUpdateDto;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -40,4 +41,17 @@ public class MerchantService extends AbstractRegistrationService {
         return businessNum != null && businessNum.length() == 10;
     }
 
+    @Transactional
+    public void updateMerchantProfile(String id, MerchantUpdateDto dto){
+        User user = userRepository.findById(id).orElseThrow(()->
+                new IllegalStateException("존재하지 않는 사용자 입니다."));
+
+        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
+            user.setPw(passwordEncoder.encode(dto.getPw()));
+        }
+
+        user.setPhNum(dto.getPhNum());
+        user.setEmail(dto.getEmail());
+        user.setBusinessNum(dto.getBusinessNum());
+    }
 }

@@ -4,6 +4,8 @@ import com.hyeongju.crs.crs.dto.AdminUpdateDto;
 import com.hyeongju.crs.crs.dto.MerchantUpdateDto;
 import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.dto.UserUpdateDto;
+import com.hyeongju.crs.crs.service.AdminService;
+import com.hyeongju.crs.crs.service.MerchantService;
 import com.hyeongju.crs.crs.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -15,12 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor // final이 붙은 필드의 생성자를 자동으로 만들어줌
-public class UserController {
+public class UserController { //todo: 지금 userController가 모든 것을 전담하고 있는데 역할에 따라 분리해야함.
 
     private final UserService userService;
 
-
-    @GetMapping("/mypage")
+    @GetMapping("/mypage")//todo:세션에서 id가 아닌 userIdx를 꺼내도록 수정해야함
     public ResponseEntity<?> getMyProfile(HttpServletRequest request){
         HttpSession session = request.getSession(false);
 
@@ -41,6 +42,7 @@ public class UserController {
         }
     }
 
+
     @PostMapping("/mypage/updateUser")
     public ResponseEntity<?> updateUserProfile(@RequestBody UserUpdateDto dto,HttpServletRequest request){
         HttpSession session = request.getSession(false);
@@ -58,46 +60,4 @@ public class UserController {
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
         
     }
-
-    @PostMapping("/mypage/updateMerchant")
-    public ResponseEntity<?> updateMerchantProfile(@RequestBody MerchantUpdateDto dto, HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("id") == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        String id = (String)session.getAttribute("id");
-
-        userService.updateMerchantProfile(id,dto);
-
-        System.out.println("상인 정보 수정 완료");
-
-        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
-    }
-
-    @PostMapping("/mypage/updateAdmin")
-    public ResponseEntity<?> updateAdminProfile(@RequestBody AdminUpdateDto dto, HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("id") == null){
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        String id = (String)session.getAttribute("id");
-
-        userService.updateAdminProfile(id,dto);
-
-        System.out.println("관리자 정보 수정 완료");
-
-        return ResponseEntity.ok("회원 정보가 수정되었습니다.");
-
-    }
-
-
-
-
-
-
-
 }

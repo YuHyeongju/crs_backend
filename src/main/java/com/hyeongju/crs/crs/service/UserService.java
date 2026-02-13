@@ -27,7 +27,7 @@ public class UserService extends AbstractRegistrationService {
 
         return userRepository.save(newUser);
     }
-
+    //todo: id로 사용자를 찾는 것을 userIdx로 찾는 것으로 변경 요망                            
     public MypageResponseDto getMyProfile(String id){
         User user = userRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
@@ -59,35 +59,4 @@ public class UserService extends AbstractRegistrationService {
         user.setPhNum(dto.getPhNum());
         user.setEmail(dto.getEmail());
     }
-
-    @Transactional
-    public void updateMerchantProfile(String id, MerchantUpdateDto dto){
-        User user = userRepository.findById(id).orElseThrow(()->
-                new IllegalStateException("존재하지 않는 사용자 입니다."));
-
-        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
-            user.setPw(passwordEncoder.encode(dto.getPw()));
-        }
-
-        user.setPhNum(dto.getPhNum());
-        user.setEmail(dto.getEmail());
-        user.setBusinessNum(dto.getBusinessNum());
-    }
-
-    @Transactional
-    public void updateAdminProfile(String id, AdminUpdateDto dto){
-        User user = userRepository.findById(id).orElseThrow(()->
-                new IllegalStateException("존재하지 않는 사용자 입니다."));
-
-        if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
-            user.setPw(passwordEncoder.encode(dto.getPw()));
-        }
-
-        user.setPhNum(dto.getPhNum());
-        user.setEmail(dto.getEmail());
-        user.setAdminNum(dto.getAdminNum());
-    }
-
-
-
 }
