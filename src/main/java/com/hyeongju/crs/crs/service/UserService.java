@@ -27,9 +27,9 @@ public class UserService extends AbstractRegistrationService {
 
         return userRepository.save(newUser);
     }
-    //todo: id로 사용자를 찾는 것을 userIdx로 찾는 것으로 변경 요망                            
-    public MypageResponseDto getMyProfile(String id){
-        User user = userRepository.findById(id).orElseThrow(
+
+    public MypageResponseDto getUserProfile(int userIdx){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(
                 () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
 
         MypageResponseDto dto = new MypageResponseDto();
@@ -40,15 +40,12 @@ public class UserService extends AbstractRegistrationService {
         dto.setGender(user.getGender());
         dto.setRole(user.getRole().getRoleName().name());
         dto.setPhNum(user.getPhNum());
-        dto.setBusinessNum(user.getBusinessNum());
-        dto.setAdminNum(user.getAdminNum());
-
         return dto;
     }
 
     @Transactional
-    public void updateUserProfile(String id, UserUpdateDto dto){
-        User user = userRepository.findById(id).orElseThrow(()->
+    public void updateUserProfile(int userIdx, UserUpdateDto dto){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(()->
                 new IllegalStateException("존재하지 않는 사용자 입니다."));
 
         if(dto.getPw() != null && !dto.getPw().trim().isEmpty()){ //

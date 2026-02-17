@@ -4,6 +4,7 @@ import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
 import com.hyeongju.crs.crs.dto.MerchantUpdateDto;
+import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -41,9 +42,25 @@ public class MerchantService extends AbstractRegistrationService {
         return businessNum != null && businessNum.length() == 10;
     }
 
+    public MypageResponseDto getMerchantProfile(int userIdx){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(
+                () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
+
+        MypageResponseDto dto = new MypageResponseDto();
+
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setGender(user.getGender());
+        dto.setRole(user.getRole().getRoleName().name());
+        dto.setPhNum(user.getPhNum());
+        dto.setBusinessNum(user.getBusinessNum());
+        return dto;
+    }
+
     @Transactional
-    public void updateMerchantProfile(String id, MerchantUpdateDto dto){
-        User user = userRepository.findById(id).orElseThrow(()->
+    public void updateMerchantProfile(int userIdx, MerchantUpdateDto dto){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(()->
                 new IllegalStateException("존재하지 않는 사용자 입니다."));
 
         if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {

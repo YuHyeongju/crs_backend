@@ -5,11 +5,17 @@ import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.AdminUpdateDto;
+import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @Service
 public class AdminService extends AbstractRegistrationService {
@@ -39,9 +45,25 @@ public class AdminService extends AbstractRegistrationService {
         return adminNum != null && adminNum.length() == 7;
     }
 
+    public MypageResponseDto getAdminProfile(int userIdx){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(
+                () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
+
+        MypageResponseDto dto = new MypageResponseDto();
+
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setGender(user.getGender());
+        dto.setRole(user.getRole().getRoleName().name());
+        dto.setPhNum(user.getPhNum());
+        dto.setAdminNum(user.getAdminNum());
+        return dto;
+    }
+
     @Transactional
-    public void updateAdminProfile(String id, AdminUpdateDto dto){
-        User user = userRepository.findById(id).orElseThrow(()->
+    public void updateAdminProfile(int userIdx, AdminUpdateDto dto){
+        User user = userRepository.findByUserIdx(userIdx).orElseThrow(()->
                 new IllegalStateException("존재하지 않는 사용자 입니다."));
 
         if(dto.getPw() != null && !dto.getPw().trim().isEmpty()) {
