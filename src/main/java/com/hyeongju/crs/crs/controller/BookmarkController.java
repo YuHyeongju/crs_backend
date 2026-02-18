@@ -1,11 +1,10 @@
 package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.domain.User;
-import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.dto.BookMarkDto;
-import com.hyeongju.crs.crs.repository.RestaurantRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
-import com.hyeongju.crs.crs.service.BookMarkService;
+import com.hyeongju.crs.crs.service.BookmarkService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/bookmarks")
+@RequestMapping("/api/bookmarks")
 @RequiredArgsConstructor
-public class BookMarkController {
+public class BookmarkController {
 
     private final UserRepository userRepository;
-    private final BookMarkService bookMarkService;
+    private final BookmarkService bookMarkService;
 
     @PostMapping("/toggle")
     public ResponseEntity<String> toggleBookMark(@RequestBody BookMarkDto dto){
@@ -53,5 +52,19 @@ public class BookMarkController {
         }
 
         return ResponseEntity.ok(bookmarkIds);
+    }
+    @GetMapping("/details")
+    public ResponseEntity<List<BookMarkDto>> getMyBookmarkDetails(HttpSession session){
+        Integer userIdx = (Integer) session.getAttribute("userIdx");
+
+        if(userIdx == null){
+            return ResponseEntity.status(401).build();
+        }
+
+        List<BookMarkDto> bookmarkDetails = bookMarkService.getBookmarkListForMypage(userIdx);
+
+        System.out.println("즐겨찾기한 가게 수: " + bookmarkDetails.size());
+
+        return ResponseEntity.ok(bookmarkDetails);
     }
 }

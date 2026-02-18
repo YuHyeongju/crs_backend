@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BookMarkService {
+public class BookmarkService {
     private final BookMarkRepository bookMarkRepository;
     private final RestaurantService restaurantService;
 
@@ -53,4 +53,18 @@ public class BookMarkService {
                 .collect(Collectors.toList());
     }
 
+    public List<BookMarkDto> getBookmarkListForMypage(int userIdx) {
+        List<BookMark> bookMarks = bookMarkRepository.findByUserUserIdx(userIdx);
+
+        return bookMarks.stream().map(bm -> {
+            BookMarkDto dto = new BookMarkDto();
+            dto.setKakaoId(bm.getRestaurant().getKakaoId());
+            dto.setRestName(bm.getRestaurant().getRestName());
+            dto.setRestAddress(bm.getRestaurant().getRestAddress());
+            dto.setRestTel(bm.getRestaurant().getRestTel());
+            dto.setUserIdx(userIdx);
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
 }
