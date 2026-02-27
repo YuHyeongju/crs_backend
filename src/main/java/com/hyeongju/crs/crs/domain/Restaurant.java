@@ -31,14 +31,8 @@ public class Restaurant {
     @Column(name = "REST_BUSI_HOURS", length = 100 )
     private String restBusiHours;
 
-    @Column(name = "REST_MENU", length = 100)
-    private String restMenu;
-
-    @Column(name = "REST_PRICE")
-    private Integer restPrice;
-
-    @Column(name = "REST_MENU_PICT", length = 500)
-    private String restMenuPict;
+    @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL , orphanRemoval = true)
+    private List<RestaurantMenu> menuList = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY)
     private List<RestaurantFacilities> facilities = new ArrayList<>();
@@ -58,5 +52,10 @@ public class Restaurant {
     @Column(nullable = false)
     private String status = "TEMP";
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "User_IDX")
+    private User user;
 
+    @Column(nullable = false)
+    private String approvalStatus = "PENDING";
 }

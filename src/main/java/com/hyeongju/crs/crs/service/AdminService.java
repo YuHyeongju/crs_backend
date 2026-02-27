@@ -1,31 +1,37 @@
 package com.hyeongju.crs.crs.service;
 
 
+import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.AdminUpdateDto;
 import com.hyeongju.crs.crs.dto.MypageResponseDto;
+import com.hyeongju.crs.crs.repository.RestaurantRepository;
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.List;
+
 
 @Service
 public class AdminService extends AbstractRegistrationService {
 
+    private final RestaurantRepository restaurantRepository;
+
+
     public AdminService(
             UserRepository userRepository,
             RoleRepository roleRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            RestaurantRepository restaurantRepository
     ){
         super(userRepository,roleRepository,passwordEncoder);
+
+        this.restaurantRepository = restaurantRepository;
     }
 
     @Transactional
@@ -74,4 +80,34 @@ public class AdminService extends AbstractRegistrationService {
         user.setEmail(dto.getEmail());
         user.setAdminNum(dto.getAdminNum());
     }
+
+    public List<Restaurant> getPendingRestaurant(){
+
+        return restaurantRepository.findByApprovalStatus("PENDING");
+
+    }
+    @Transactional
+    public void approvalRestaurant(int restIdx){
+        Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(()-> new RuntimeException("가게를 찾을 수 없음"));
+
+        restaurant.setApprovalStatus("APPROVED");
+        restaurant.setStatus("ACTIVE");
+
+        restaurantRepository.save(restaurant);
+    }
+    
+    @Transactional
+    public void rejectRestaurant(int restIdx){
+        Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(()-> new RuntimeException("가게를 찾을 수 없음"));
+        restaurant.setApprovalStatus("REJECT");
+        restaurant.setStatus("ACTIVE");
+
+        restaurantRepository.save(restaurant);
+    }
+    
+
+
+
 }

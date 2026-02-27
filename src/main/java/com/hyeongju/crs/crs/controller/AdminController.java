@@ -1,14 +1,18 @@
 package com.hyeongju.crs.crs.controller;
 
+import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.dto.AdminUpdateDto;
 import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -55,5 +59,22 @@ public class AdminController {
 
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
 
+    }
+    @GetMapping("/pending")
+    public ResponseEntity<List<Restaurant>> getPendingList(){
+        return ResponseEntity.ok(adminService.getPendingRestaurant());
+    }
+
+
+    @PostMapping("/approve/{restIdx}")
+    public ResponseEntity<String> approveRestaurant(@PathVariable ("restIdx") int restIdx){
+        adminService.approvalRestaurant(restIdx);
+        return ResponseEntity.ok("가게가 성공적으로 승인되었습니다.");
+    }
+
+    @PostMapping("/reject/{restIdx}")
+    public ResponseEntity<String> rejectRestaurant(@PathVariable ("restIdx") int restIdx){
+        adminService.rejectRestaurant(restIdx);
+        return ResponseEntity.ok("가게 등록이 거절되었습니다.");
     }
 }
