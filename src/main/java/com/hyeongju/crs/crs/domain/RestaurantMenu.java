@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,5 +29,6 @@ public class RestaurantMenu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REST_IDX")
+    @JsonIgnore
     private Restaurant restaurant;
 }

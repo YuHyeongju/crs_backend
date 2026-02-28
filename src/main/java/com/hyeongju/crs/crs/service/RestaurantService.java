@@ -64,6 +64,10 @@ public class RestaurantService {
             int index = 0;
             for(RestaurantRequestDto.MenuList menuDto : dto.getMenulist()){
                 RestaurantMenu menu = new RestaurantMenu();
+
+                System.out.println(">>> [백엔드 디버깅] 메뉴 이름: " + menuDto.getMenuName());
+                System.out.println(">>> [백엔드 디버깅] 메뉴 가격: " + menuDto.getMenuPrice());
+
                 menu.setMenuName(menuDto.getMenuName());
                 menu.setMenuPrice(menuDto.getMenuPrice());
 

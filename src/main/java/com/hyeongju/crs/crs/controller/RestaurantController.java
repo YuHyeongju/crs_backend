@@ -40,6 +40,8 @@ public class RestaurantController {
                                                 @RequestPart(value = "menuImages", required = false)
                                                 List<MultipartFile> menuImages, HttpSession session){
 
+
+
         Integer userIdx = (Integer) session.getAttribute("userIdx");
 
         if(userIdx == null){
@@ -49,10 +51,18 @@ public class RestaurantController {
         try {
             Restaurant result = restaurantService.registerRestaurantByMerchant(dto, userIdx, menuImages);
             System.out.println("식당 및 메뉴 사진 등록 성공");
+
             return ResponseEntity.ok(result);
+
         }catch (Exception e){
+            System.out.println(">>> [디버깅] 등록 실패한 DTO: " + dto.toString());
+
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("등록 중에 오류 발생:" +
                     e.getMessage());
+
+
+
         }
+
     }
 }
