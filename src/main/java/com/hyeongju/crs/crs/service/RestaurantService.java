@@ -48,6 +48,8 @@ public class RestaurantService {
         User merchant = userRepository.findByUserIdx(userIdx)
                 .orElseThrow(() -> new RuntimeException("상인 정보를 찾을 수 가 없습니다."));
 
+        String merchantName = merchant.getName();
+
 
         Restaurant restaurant = restaurantRepository.findByKakaoId(dto.getKakaoId())
                 .orElseGet(() -> {
@@ -96,7 +98,7 @@ public class RestaurantService {
                 if (menuImages != null && index < menuImages.size()) {
                     MultipartFile imageFile = menuImages.get(index);
                     if (!imageFile.isEmpty()) {
-                        String savedName = saveImage(imageFile);
+                        String savedName = saveImage(imageFile,merchantName);
                         menu.setMenuPict(savedName);
                     }
                 }
@@ -112,7 +114,7 @@ public class RestaurantService {
         return restaurantRepository.save(restaurant);
     }
 
-    private String saveImage(MultipartFile file) throws IOException {
+    private String saveImage(MultipartFile file, String userName) throws IOException {
         File dir = new File(uploadPath);
         if (!dir.exists()) {
             boolean created = dir.mkdirs();
@@ -121,9 +123,10 @@ public class RestaurantService {
             }
         }
 
-        String originFilename = file.getOriginalFilename();
-        String uuid = UUID.randomUUID().toString();
-        String saveName = uuid + "_" + originFilename;
+        String timeStamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new java.util.Date());
+
+        String saveName = timeStamp + "_" + userName;
 
         File target = new File(uploadPath + saveName);
         file.transferTo(target);
@@ -132,7 +135,8 @@ public class RestaurantService {
     }
 
     public List<RestaurantResponseDto> getMyRestaurants(int userIdx) {
-        List<Restaurant> restaurants = restaurantRepository.findByUserUserIdx(userIdx);
+        List<Restaurant> restaurants = restaurantRepository.findByUserUserIdxAndApprovalStatus(
+                userIdx,"APPROVED");
 
         return restaurants.stream().map(restaurant -> {
             RestaurantResponseDto dto = new RestaurantResponseDto();
@@ -189,6 +193,7 @@ public class RestaurantService {
                                                  List<MultipartFile> menuImages) throws IOException {
         Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
                 .orElseThrow(() -> new IllegalStateException("수정할 식당 정보를 찾을 수 없음"));
+        String merchantName = restaurant.getUser().getName();
 
         restaurant.setRestName(dto.getRestName());
         restaurant.setRestAddress(dto.getRestAddress());
@@ -225,7 +230,7 @@ public class RestaurantService {
                 if (menuImages != null && index < menuImages.size()) {
                     MultipartFile imageFile = menuImages.get(index);
                     if (!imageFile.isEmpty()) {
-                        String saveName = saveImage(imageFile);
+                        String saveName = saveImage(imageFile, merchantName);
                         menu.setMenuPict(saveName);
                     }
                 }
