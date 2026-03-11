@@ -10,6 +10,7 @@ import com.hyeongju.crs.crs.repository.RestaurantRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,15 +29,27 @@ public class RestaurantService {
 
     private final String uploadPath = "C:/upload/menu_picts/";
 
+
+
     @Transactional
     public Restaurant getOrCreateRestaurant(String kakaoId, String restName, String restAddress, String restTel) {
+
         return restaurantRepository.findByKakaoId(kakaoId).orElseGet(() -> {
-            Restaurant newRestaurant = new Restaurant();
-            newRestaurant.setKakaoId(kakaoId);
-            newRestaurant.setRestName(restName);
-            newRestaurant.setRestAddress(restAddress);
-            newRestaurant.setRestTel(restTel);
-            return restaurantRepository.save(newRestaurant);
+            try {
+
+                Restaurant newRestaurant = new Restaurant();
+                newRestaurant.setKakaoId(kakaoId);
+                newRestaurant.setRestName(restName);
+                newRestaurant.setRestAddress(restAddress);
+                newRestaurant.setRestTel(restTel);
+
+
+                return restaurantRepository.saveAndFlush(newRestaurant);
+            } catch (DataIntegrityViolationException e) {
+
+                return restaurantRepository.findByKakaoId(kakaoId)
+                        .orElseThrow(() -> new RuntimeException("가게 정보 등록 중 동시성 오류 발생"));
+            }
         });
     }
 

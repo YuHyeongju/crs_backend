@@ -37,7 +37,7 @@ public class BookmarkController {
     }
 
     @GetMapping("/my-bookmark-list/{userIdx}")
-    public ResponseEntity<List<String>> getUserBoookMarkIds(@PathVariable("userIdx") int userIdx) {
+    public ResponseEntity<List<String>> getUserBookMarkIds(@PathVariable("userIdx") int userIdx) {
         // 🔍 1. 요청이 들어왔는지 확인
         System.out.println("====== [북마크 조회 요청] userIdx: " + userIdx + " ======");
 
