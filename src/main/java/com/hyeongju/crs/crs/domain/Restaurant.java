@@ -2,10 +2,11 @@ package com.hyeongju.crs.crs.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
+import jakarta.persistence.*; // Added missing JPA imports
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
@@ -50,6 +51,7 @@ public class Restaurant {
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
+    @BatchSize(size = 10) // Added for N+1 optimization
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Congestion> congestions = new ArrayList<>();
 

@@ -77,10 +77,32 @@ public class CongestionService {
         if(kakaoIds == null || kakaoIds.isEmpty()){
             return resultMap;
         }
-        for(String id : kakaoIds){
-            String status = getCurrentcongestion(id);
-            resultMap.put(id, status);
+
+        // Fetch all restaurants in a single query
+        List<Restaurant> restaurants = restaurantRepository.findByKakaoIdIn(kakaoIds);
+
+        // Create a map for quick lookup of restaurants by kakaoId
+        Map<String, Restaurant> restaurantMap = restaurants.stream()
+                .collect(Collectors.toMap(Restaurant::getKakaoId, restaurant -> restaurant));
+
+        // Process the fetched restaurants
+        for (String kakaoId : kakaoIds) {
+            Restaurant restaurant = restaurantMap.get(kakaoId);
+            String status = CongestionStatus.NONE.getName(); // Default to NONE
+
+            if (restaurant != null) {
+                List<Congestion> history = restaurant.getCongestions(); // @BatchSize will optimize this
+
+                if (history != null && !history.isEmpty()) {
+                    // Sort history by CongAt to get the latest congestion
+                    history.sort((c1, c2) -> c2.getCongAt().compareTo(c1.getCongAt()));
+                    Congestion lastCong = history.get(0);
+                    status = lastCong.getCongStatus().getName();
+                }
+            }
+            resultMap.put(kakaoId, status);
         }
+
         return resultMap;
     }
 
