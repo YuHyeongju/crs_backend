@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +40,7 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REST_IDX",nullable = false)
+    @JsonIgnore
     private Restaurant restaurant;
 
 

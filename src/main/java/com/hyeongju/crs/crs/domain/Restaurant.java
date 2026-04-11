@@ -47,6 +47,7 @@ public class Restaurant {
     private List<BookMark> bookMarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

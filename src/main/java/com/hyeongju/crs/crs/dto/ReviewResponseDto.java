@@ -1,7 +1,6 @@
 package com.hyeongju.crs.crs.dto;
 
 import com.hyeongju.crs.crs.domain.Review;
-import com.hyeongju.crs.crs.domain.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +16,7 @@ public class ReviewResponseDto {
     private int rating;
     private LocalDateTime reviewAt;
     private int userIdx;
+    private String userName;
 
     public ReviewResponseDto(Review review){
         this.reviewIdx = review.getReviewIdx();
@@ -24,5 +24,7 @@ public class ReviewResponseDto {
         this.rating = review.getRating();
         this.reviewAt = review.getReviewAt();
         this.userIdx = review.getUser().getUserIdx();
+        this.userName = review.getUser().getName();
+
     }
 }

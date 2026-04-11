@@ -25,7 +25,7 @@ public class RestaurantController {
 
     @PostMapping("/detail")
     public ResponseEntity<Restaurant> restaurantDetail(@RequestBody RestaurantRequestDto dto){
-        // 서비스에있는 getOrCreateRestaurant를 호출해서 식당 불러옴\
+        // 서비스에있는 getOrCreateRestaurant를 호출해서 식당 불러옴
         Restaurant restaurant = restaurantService.getOrCreateRestaurant(
                 dto.getKakaoId(),
                 dto.getRestName(),

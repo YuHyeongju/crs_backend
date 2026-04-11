@@ -82,9 +82,7 @@ public class AdminService extends AbstractRegistrationService {
     }
 
     public List<Restaurant> getPendingRestaurant(){
-
-        return restaurantRepository.findByApprovalStatus("PENDING");
-
+        return restaurantRepository.findByApprovalStatusAndStatus("PENDING", "ACTIVE");
     }
     @Transactional
     public void approvalRestaurant(int restIdx){

@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor; // 기본 생성자를 생성
@@ -58,21 +59,26 @@ public class User {
     private LocalDateTime createTime;
 
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<BookMark> bookMarks = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Reward> rewards = new ArrayList<>();
 
     @OneToMany(mappedBy = "reporter",fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<ReviewReport> reviewReports = new ArrayList<>();
 
     // mappedBy에는 many to one 으로 참조하는 컬럼의 필드 이름을 작성
     // 내 주인은 저 컬럼 입니다를 알려주는 것.
     // 이 리스트를 채우려면 Congestion 테이블에 있는 user 필드가 가르키는 외래키를 조회해라
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Congestion> congestions = new ArrayList<>();
 
 }

@@ -1,14 +1,11 @@
 package com.hyeongju.crs.crs.controller;
 
+import com.hyeongju.crs.crs.dto.ReviewRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewResponseDto;
-import com.hyeongju.crs.crs.repository.ReviewRepository;
 import com.hyeongju.crs.crs.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -23,6 +20,13 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseDto>> getReviewByRestIdx(@PathVariable("restIdx") int restIdx){
         List<ReviewResponseDto> reviews = reviewService.getReviewsByRestaurant(restIdx);
         return ResponseEntity.ok(reviews);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> registerReview(@RequestBody ReviewRequestDto requestDto){
+        reviewService.saveReview(requestDto);
+
+        return ResponseEntity.ok("리뷰가 등록되었습니다.");
     }
 
 }

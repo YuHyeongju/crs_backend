@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class Role {
     private RoleName roleName;
 
     @OneToMany(mappedBy = "role",fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<User> users = new ArrayList<>();
     // 하나의 역할은 여러 사람에게 주어진다.
 }

@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +22,7 @@ public class Reward {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_IDX",nullable = false)
+    @JsonIgnore
     private User user;
 
     @Column(name = "TOTAL_REWARD_VALUE",nullable = false)
