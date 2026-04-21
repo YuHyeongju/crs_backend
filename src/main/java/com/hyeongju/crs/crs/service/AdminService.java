@@ -1,13 +1,12 @@
 package com.hyeongju.crs.crs.service;
 
 
-import com.hyeongju.crs.crs.domain.Restaurant;
-import com.hyeongju.crs.crs.domain.RoleName;
-import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.domain.*;
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.repository.CongestionRepository; // Import CongestionRepository
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
-import com.hyeongju.crs.crs.repository.ReviewRepository; // Import ReviewRepository
+import com.hyeongju.crs.crs.repository.ReviewRepository;
+import com.hyeongju.crs.crs.repository.ReviewReportRepository; // Added
 import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -15,15 +14,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors; // Import Collectors\
-
+import java.util.stream.Collectors;
 
 @Service
 public class AdminService extends AbstractRegistrationService {
 
     private final RestaurantRepository restaurantRepository;
-    private final CongestionRepository congestionRepository; // Added
-    private final ReviewRepository reviewRepository; // Added
+    private final CongestionRepository congestionRepository;
+    private final ReviewRepository reviewRepository;
+    private final ReviewReportRepository reviewReportRepository; // Added
 
 
     public AdminService(
@@ -31,15 +30,18 @@ public class AdminService extends AbstractRegistrationService {
             RoleRepository roleRepository,
             PasswordEncoder passwordEncoder,
             RestaurantRepository restaurantRepository,
-            CongestionRepository congestionRepository, // Added
-            ReviewRepository reviewRepository // Added
+            CongestionRepository congestionRepository,
+            ReviewRepository reviewRepository,
+            ReviewReportRepository reviewReportRepository // Added
     ){
         super(userRepository,roleRepository,passwordEncoder);
 
         this.restaurantRepository = restaurantRepository;
-        this.congestionRepository = congestionRepository; // Added
-        this.reviewRepository = reviewRepository; // Added
+        this.congestionRepository = congestionRepository;
+        this.reviewRepository = reviewRepository;
+        this.reviewReportRepository = reviewReportRepository; // Added
     }
+
 
     @Transactional
     public User registerAdmin(AdminRegistractionDto dto){
@@ -151,5 +153,34 @@ public class AdminService extends AbstractRegistrationService {
 
         user.setStatus("DEACTIVATED");
         userRepository.save(user); // Save the updated user status
+    }
+
+    // Review Report Management
+    public List<ReviewReport> getAllReviewReports() {
+        return reviewReportRepository.findAll();
+    }
+
+    public ReviewReport getReviewReportDetails(int reportIdx) {
+        return reviewReportRepository.findById(reportIdx)
+                .orElseThrow(() -> new RuntimeException("Review report not found."));
+    }
+
+    @Transactional
+    public void processReviewReport(int reportIdx, boolean approve) {
+        ReviewReport report = reviewReportRepository.findById(reportIdx)
+                .orElseThrow(() -> new RuntimeException("Review report not found."));
+
+        if (approve) {
+            // Approve the report: change review status and report status
+            Review reportedReview = report.getReportedReview();
+            reportedReview.setStatus("BLOCKED"); // Or "HIDDEN", "DELETED" based on policy
+            reviewRepository.save(reportedReview);
+
+            report.setStatus("APPROVED");
+        } else {
+            // Reject the report: change report status
+            report.setStatus("REJECTED");
+        }
+        reviewReportRepository.save(report);
     }
 }

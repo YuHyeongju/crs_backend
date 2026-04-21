@@ -1,6 +1,7 @@
 package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.domain.Restaurant;
+import com.hyeongju.crs.crs.domain.ReviewReport;
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -104,6 +105,34 @@ public class AdminController {
         try {
             adminService.deactivateUser(userIdx);
             return ResponseEntity.ok("사용자가 성공적으로 탈퇴 처리되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    // Review Report Management Endpoints
+    @GetMapping("/reports")
+    public ResponseEntity<List<ReviewReport>> getAllReviewReports() {
+        List<ReviewReport> reports = adminService.getAllReviewReports();
+        return ResponseEntity.ok(reports);
+    }
+
+    @GetMapping("/reports/{reportIdx}")
+    public ResponseEntity<ReviewReport> getReviewReportDetails(@PathVariable("reportIdx") int reportIdx) {
+        try {
+            ReviewReport report = adminService.getReviewReportDetails(reportIdx);
+            return ResponseEntity.ok(report);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Or a custom error DTO
+        }
+    }
+
+    @PostMapping("/reports/{reportIdx}/process")
+    public ResponseEntity<String> processReviewReport(@PathVariable("reportIdx") int reportIdx,
+                                                      @RequestParam("approve") boolean approve) {
+        try {
+            adminService.processReviewReport(reportIdx, approve);
+            return ResponseEntity.ok("Review report processed successfully.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

@@ -32,4 +32,7 @@ public class ReviewReport {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REPORTED_REVIEW_IDX",nullable = false)
     private Review reportedReview;
+
+    @Column(name = "STATUS", nullable = false, length = 20)
+    private String status = "PENDING"; // PENDING, APPROVED, REJECTED
 }

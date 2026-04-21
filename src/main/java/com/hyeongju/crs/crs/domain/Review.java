@@ -34,6 +34,9 @@ public class Review {
     @Column(name = "REVIEW_DELETE_AT")
     private LocalDateTime reviewDeleteAt;
 
+    @Column(name = "STATUS", nullable = false, length = 20)
+    private String status = "ACTIVE"; // ACTIVE, BLOCKED, DELETED
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_IDX",nullable = false)
     private User user;
