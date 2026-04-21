@@ -11,5 +11,7 @@ public interface CongestionRepository extends JpaRepository<Congestion, Integer>
 
     List<Congestion> findByUserUserIdxOrderByCongAtDesc(int userIdx);
 
+    long countByUserUserIdx(int userIdx);
+
 
 }

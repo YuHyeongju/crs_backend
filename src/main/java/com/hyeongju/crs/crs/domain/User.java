@@ -58,6 +58,9 @@ public class User {
     @Column(name= "CREATE_TIME")
     private LocalDateTime createTime;
 
+    @Column(name = "STATUS", nullable = false, length = 20) // Added status field
+    private String status = "ACTIVE";
+
     @OneToMany(mappedBy = "user",fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();

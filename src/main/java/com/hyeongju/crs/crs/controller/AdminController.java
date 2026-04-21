@@ -1,12 +1,10 @@
 package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.domain.Restaurant;
-import com.hyeongju.crs.crs.dto.AdminUpdateDto;
-import com.hyeongju.crs.crs.dto.MypageResponseDto;
+import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,4 +75,39 @@ public class AdminController {
         adminService.rejectRestaurant(restIdx);
         return ResponseEntity.ok("가게 등록이 거절되었습니다.");
     }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<UserListResponseDto>> getAllUsers() {
+        List<UserListResponseDto> users = adminService.getAllUsers();
+        return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/users/{userIdx}")
+    public ResponseEntity<UserDetailsResponseDto> getUserDetails(@PathVariable("userIdx") int userIdx) {
+        UserDetailsResponseDto userDetails = adminService.getUserDetails(userIdx);
+        return ResponseEntity.ok(userDetails);
+    }
+
+    @PostMapping("/users/{userIdx}/sanction")
+    public ResponseEntity<String> sanctionUser(@PathVariable("userIdx") int userIdx,
+                                               @RequestBody SanctionRequestDto requestDto) {
+        try {
+            adminService.sanctionUser(userIdx, requestDto.getReason());
+            return ResponseEntity.ok("사용자가 성공적으로 제재되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/users/{userIdx}/deactivate") // New endpoint for deactivating a user
+    public ResponseEntity<String> deactivateUser(@PathVariable("userIdx") int userIdx) {
+        try {
+            adminService.deactivateUser(userIdx);
+            return ResponseEntity.ok("사용자가 성공적으로 탈퇴 처리되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }
+
+
