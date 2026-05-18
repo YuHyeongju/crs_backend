@@ -7,6 +7,7 @@ import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
+import com.hyeongju.crs.crs.repository.ReviewRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
 
     private final String uploadPath = "C:/upload/menu_picts/";
 
@@ -155,9 +157,59 @@ public class RestaurantService {
             dto.setRestIdx(restaurant.getRestIdx());
             dto.setRestName(restaurant.getRestName());
             dto.setRestAddress(restaurant.getRestAddress());
+
+            // Calculate average rating and review count
+            Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
+                                                .orElse(0.0); // Default to 0.0 if no reviews
+            Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
+
+            dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0); // Round to one decimal place
+            dto.setReviewCount(reviewCount);
+
             return dto;
         }).collect(Collectors.toList());
     }
+
+    public RestaurantResponseDto getRestaurantDetails(int restIdx) {
+
+        Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(() -> new IllegalStateException("해당 식당 정보를 찾을 수 없음: " + restIdx));
+
+        RestaurantResponseDto dto = new RestaurantResponseDto();
+        dto.setRestIdx(restaurant.getRestIdx());
+        dto.setRestName(restaurant.getRestName());
+        dto.setRestAddress(restaurant.getRestAddress());
+
+        Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
+                                            .orElse(0.0);
+        Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
+
+        dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
+        dto.setReviewCount(reviewCount);
+
+        return dto;
+    }
+
+    public RestaurantResponseDto getRestaurantDetailsByKakaoId(String kakaoId) {
+        Restaurant restaurant = restaurantRepository.findByKakaoId(kakaoId)
+                .orElseThrow(() -> new IllegalStateException("해당 식당 정보를 찾을 수 없음: " + kakaoId));
+
+        RestaurantResponseDto dto = new RestaurantResponseDto();
+        dto.setRestIdx(restaurant.getRestIdx());
+        dto.setRestName(restaurant.getRestName());
+        dto.setRestAddress(restaurant.getRestAddress());
+
+        Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
+                                            .orElse(0.0);
+        Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
+
+        dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
+        dto.setReviewCount(reviewCount);
+
+        return dto;
+    }
+
+
 
     @Transactional
     public RestaurantRequestDto getRestaurantForEdit(int restIdx) {
