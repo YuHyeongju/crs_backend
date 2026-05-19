@@ -18,7 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -190,23 +192,58 @@ public class RestaurantService {
         return dto;
     }
 
+    // 여러 카카오ID의 평점/리뷰수를 한 번에 — 지도 핀 로딩 최적화용
+    public Map<String, RestaurantResponseDto> getBulkDetailsByKakaoIds(List<String> kakaoIds) {
+        Map<String, RestaurantResponseDto> result = new HashMap<>();
+        if (kakaoIds == null || kakaoIds.isEmpty()) return result;
+
+        List<Restaurant> restaurants = restaurantRepository.findByKakaoIdIn(kakaoIds);
+        if (restaurants.isEmpty()) return result;
+
+        List<Integer> restIdxes = restaurants.stream()
+                .map(Restaurant::getRestIdx)
+                .collect(Collectors.toList());
+
+        // restIdx -> [avg, count]
+        Map<Integer, double[]> statsMap = new HashMap<>();
+        for (Object[] row : reviewRepository.findRatingStatsByRestIdxIn(restIdxes)) {
+            Integer restIdx = (Integer) row[0];
+            double avg = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            long count = ((Number) row[2]).longValue();
+            statsMap.put(restIdx, new double[]{avg, count});
+        }
+
+        for (Restaurant r : restaurants) {
+            double[] stats = statsMap.getOrDefault(r.getRestIdx(), new double[]{0.0, 0});
+            RestaurantResponseDto dto = new RestaurantResponseDto();
+            dto.setRestIdx(r.getRestIdx());
+            dto.setRestName(r.getRestName());
+            dto.setRestAddress(r.getRestAddress());
+            dto.setAverageRating(Math.round(stats[0] * 10.0) / 10.0);
+            dto.setReviewCount((int) stats[1]);
+            result.put(r.getKakaoId(), dto);
+        }
+        return result;
+    }
+
     public RestaurantResponseDto getRestaurantDetailsByKakaoId(String kakaoId) {
-        Restaurant restaurant = restaurantRepository.findByKakaoId(kakaoId)
-                .orElseThrow(() -> new IllegalStateException("해당 식당 정보를 찾을 수 없음: " + kakaoId));
+        return restaurantRepository.findByKakaoId(kakaoId)
+                .map(restaurant -> {
+                    RestaurantResponseDto dto = new RestaurantResponseDto();
+                    dto.setRestIdx(restaurant.getRestIdx());
+                    dto.setRestName(restaurant.getRestName());
+                    dto.setRestAddress(restaurant.getRestAddress());
 
-        RestaurantResponseDto dto = new RestaurantResponseDto();
-        dto.setRestIdx(restaurant.getRestIdx());
-        dto.setRestName(restaurant.getRestName());
-        dto.setRestAddress(restaurant.getRestAddress());
+                    Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
+                                                        .orElse(0.0);
+                    Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
 
-        Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
-                                            .orElse(0.0);
-        Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
-
-        dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
-        dto.setReviewCount(reviewCount);
-
-        return dto;
+                    dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
+                    dto.setReviewCount(reviewCount);
+                    return dto;
+                })
+                // DB 미등록 카카오ID: 빈 DTO 반환 (지도에서 처음 보는 식당 대응)
+                .orElseGet(() -> new RestaurantResponseDto(null, null, null, 0.0, 0));
     }
 
 

@@ -111,7 +111,7 @@ public class AuthController {
             //프론트가 필요한 정보 전달
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("userIdx",user.getUserIdx());
-            responseData.put("role",user.getRole().getRoleName().name());
+            responseData.put("role", user.getRole() != null && user.getRole().getRoleName() != null ? user.getRole().getRoleName().name() : "UNKNOWN"); // Added null check for role
             responseData.put("name",user.getName());
             responseData.put("message","로그인 성공");
 

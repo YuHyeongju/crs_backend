@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -91,21 +92,24 @@ public class RestaurantController {
         }
     }
 
-    @GetMapping("/{restIdx}")
-    public ResponseEntity<?> getRestaurantDetail(@PathVariable("restIdx") Integer restIdx, HttpSession session) {
-        // 보안을 위한 세션 체크
-        Integer userIdx = (Integer) session.getAttribute("userIdx");
-        if (userIdx == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
+    @PostMapping("/bulkDetails")
+    public ResponseEntity<Map<String, RestaurantResponseDto>> getBulkDetailsByKakaoIds(@RequestBody List<String> kakaoIds) {
         try {
-
-            RestaurantRequestDto dto = restaurantService.getRestaurantForEdit(restIdx);
-            return ResponseEntity.ok(dto);
+            return ResponseEntity.ok(restaurantService.getBulkDetailsByKakaoIds(kakaoIds));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("가게 정보를 불러오지 못했습니다: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @GetMapping("/kakaoId/{kakaoId}")
+    public ResponseEntity<RestaurantResponseDto> getRestaurantDetailByKakaoId(@PathVariable("kakaoId") String kakaoId) {
+        // DB에 없는 카카오ID도 빈 DTO(평점 0, 리뷰 0)를 200으로 반환
+        try {
+            return ResponseEntity.ok(restaurantService.getRestaurantDetailsByKakaoId(kakaoId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
