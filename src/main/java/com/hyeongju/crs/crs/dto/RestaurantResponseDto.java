@@ -14,4 +14,5 @@ public class RestaurantResponseDto {
     private String restAddress;
     private Double averageRating;
     private Integer reviewCount;
+    private Integer ownerUserIdx;
 }

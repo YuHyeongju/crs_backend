@@ -226,6 +226,7 @@ public class RestaurantService {
         return result;
     }
 
+    @Transactional
     public RestaurantResponseDto getRestaurantDetailsByKakaoId(String kakaoId) {
         return restaurantRepository.findByKakaoId(kakaoId)
                 .map(restaurant -> {
@@ -240,10 +241,12 @@ public class RestaurantService {
 
                     dto.setAverageRating(Math.round(averageRating * 10.0) / 10.0);
                     dto.setReviewCount(reviewCount);
+                    // 가게를 등록한 상인 식별자 — 미등록(카카오 자동생성) 식당이면 null
+                    dto.setOwnerUserIdx(restaurant.getUser() != null ? restaurant.getUser().getUserIdx() : null);
                     return dto;
                 })
                 // DB 미등록 카카오ID: 빈 DTO 반환 (지도에서 처음 보는 식당 대응)
-                .orElseGet(() -> new RestaurantResponseDto(null, null, null, 0.0, 0));
+                .orElseGet(() -> new RestaurantResponseDto(null, null, null, 0.0, 0, null));
     }
 
 

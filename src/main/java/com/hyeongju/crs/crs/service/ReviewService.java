@@ -2,10 +2,13 @@ package com.hyeongju.crs.crs.service;
 
 import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.domain.Review;
+import com.hyeongju.crs.crs.domain.ReviewReport;
 import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.dto.ReviewReportRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewResponseDto;
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
+import com.hyeongju.crs.crs.repository.ReviewReportRepository;
 import com.hyeongju.crs.crs.repository.ReviewRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -26,6 +29,7 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final RestaurantRepository restaurantRepository;
+    private final ReviewReportRepository reviewReportRepository;
 
     @Transactional
     public List<ReviewResponseDto> getReviewsByRestaurant(int restIdx){
@@ -52,6 +56,34 @@ public class ReviewService {
         review.setReviewAt(LocalDateTime.now());
 
         reviewRepository.save(review);
+    }
+
+    // 해당 가게를 소유한 상인만 자기 가게 리뷰를 신고할 수 있음 (프론트 노출과 별개로 서버에서 재검증)
+    @Transactional
+    public void reportReview(ReviewReportRequestDto dto) {
+        Review review = reviewRepository.findById(dto.getReviewIdx())
+                .orElseThrow(() -> new IllegalStateException("신고할 리뷰를 찾을 수 없습니다."));
+
+        User reporter = userRepository.findByUserIdx(dto.getReporterUserIdx())
+                .orElseThrow(() -> new IllegalStateException("신고자 정보를 찾을 수 없습니다."));
+
+        User owner = review.getRestaurant().getUser();
+        if (owner == null || owner.getUserIdx() != reporter.getUserIdx()) {
+            throw new SecurityException("해당 가게를 소유한 상인만 신고할 수 있습니다.");
+        }
+
+        if (dto.getReason() == null || dto.getReason().trim().isEmpty()) {
+            throw new IllegalArgumentException("신고 사유를 입력해야 합니다.");
+        }
+
+        ReviewReport report = new ReviewReport();
+        report.setReportedReview(review);
+        report.setReporter(reporter);
+        report.setReason(dto.getReason().trim());
+        report.setReportAt(LocalDateTime.now());
+        report.setStatus("PENDING");
+
+        reviewReportRepository.save(report);
     }
 
 }
