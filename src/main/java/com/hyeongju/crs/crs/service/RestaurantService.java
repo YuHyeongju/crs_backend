@@ -38,23 +38,40 @@ public class RestaurantService {
     @Transactional
     public Restaurant getOrCreateRestaurant(String kakaoId, String restName, String restAddress, String restTel) {
 
-        return restaurantRepository.findByKakaoId(kakaoId).orElseGet(() -> {
-            try {
+        return restaurantRepository.findByKakaoId(kakaoId)
+                .map(existing -> {
+                    boolean changed = false;
+                    if (isBlank(existing.getRestName()) && !isBlank(restName)) {
+                        existing.setRestName(restName);
+                        changed = true;
+                    }
+                    if (isBlank(existing.getRestAddress()) && !isBlank(restAddress)) {
+                        existing.setRestAddress(restAddress);
+                        changed = true;
+                    }
+                    if (isBlank(existing.getRestTel()) && !isBlank(restTel)) {
+                        existing.setRestTel(restTel);
+                        changed = true;
+                    }
+                    return changed ? restaurantRepository.saveAndFlush(existing) : existing;
+                })
+                .orElseGet(() -> {
+                    try {
+                        Restaurant newRestaurant = new Restaurant();
+                        newRestaurant.setKakaoId(kakaoId);
+                        newRestaurant.setRestName(restName);
+                        newRestaurant.setRestAddress(restAddress);
+                        newRestaurant.setRestTel(restTel);
+                        return restaurantRepository.saveAndFlush(newRestaurant);
+                    } catch (DataIntegrityViolationException e) {
+                        return restaurantRepository.findByKakaoId(kakaoId)
+                                .orElseThrow(() -> new RuntimeException("가게 정보 등록 중 동시성 오류 발생"));
+                    }
+                });
+    }
 
-                Restaurant newRestaurant = new Restaurant();
-                newRestaurant.setKakaoId(kakaoId);
-                newRestaurant.setRestName(restName);
-                newRestaurant.setRestAddress(restAddress);
-                newRestaurant.setRestTel(restTel);
-
-
-                return restaurantRepository.saveAndFlush(newRestaurant);
-            } catch (DataIntegrityViolationException e) {
-
-                return restaurantRepository.findByKakaoId(kakaoId)
-                        .orElseThrow(() -> new RuntimeException("가게 정보 등록 중 동시성 오류 발생"));
-            }
-        });
+    private boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 
     @Transactional
