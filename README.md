@@ -1,8 +1,8 @@
 # CRS (Congestion & Restaurant Service) — Backend
 
 식당의 **실시간 혼잡도**와 **리뷰**를 지도 기반으로 제공하는 서비스의 백엔드 API 서버입니다.
-일반 사용자는 식당 혼잡도/리뷰를 조회·등록하고, 상인(MERCHANT)은 자기 가게를 등록·관리하며,
-관리자(ADMIN)는 가게 승인·회원 제재·신고 처리를 수행합니다.
+일반 사용자는 식당 혼잡도/리뷰를 조회·등록하고, 혼잡도를 제보하면 **리워드 포인트**를 적립해 가게 **쿠폰**으로 교환할 수 있습니다.
+상인(MERCHANT)은 자기 가게를 등록·관리하고 쿠폰을 발행하며, 관리자(ADMIN)는 가게 승인·회원 제재·신고 처리를 수행합니다.
 
 > 이 저장소는 **백엔드 전용**입니다. 프론트엔드(React, `http://localhost:3000`)는 별도 저장소이며
 > 이 레포에서는 `crs_frontend/` 경로로 `.gitignore` 처리되어 추적되지 않습니다.
@@ -48,7 +48,9 @@ src/main/java/com/hyeongju/crs/crs/
 - **Congestion / CongestionStatus** — 식당별 혼잡도 기록 및 상태값. (N+1 최적화 적용 — `troubleshooting_N1_congestion.md` 참고)
 - **Review / ReviewReport** — 리뷰 및 리뷰 신고
 - **BookMark** — 사용자별 즐겨찾기
-- **Reward** — 리워드(엔티티만 존재, 기능 미구현)
+- **Reward** — 포인트 적립/차감 **장부**(이벤트 1행 단위). 혼잡도 제보 시 적립(+), 쿠폰 교환 시 차감(−). 잔액은 합계(`SUM`)로 계산.
+- **Coupon** — 상인이 자기 가게에 발행하는 쿠폰(제목·필요 포인트·유효기간·활성여부).
+- **UserCoupon** — 유저가 포인트로 교환해 보유한 쿠폰(사용 여부·발급/사용 시각).
 
 ---
 
@@ -82,7 +84,7 @@ src/main/java/com/hyeongju/crs/crs/
 | :--- | :--- | :--- |
 | GET | `/{kakaoId}` | 단일 가게 현재 혼잡도 |
 | POST | `/bulkStatus` | 여러 가게 현재 혼잡도 일괄 조회 |
-| POST | `/updateStatus` | 혼잡도 상태 등록/갱신 |
+| POST | `/updateStatus` | 혼잡도 상태 등록/갱신 (제보 시 리워드 포인트 자동 적립, 같은 가게 30분 쿨다운) |
 | GET | `/history` | 내 혼잡도 제보 이력 (세션 필요) |
 
 ### 리뷰 `/api/reviews`
@@ -101,6 +103,22 @@ src/main/java/com/hyeongju/crs/crs/
 | POST | `/toggle` | 즐겨찾기 추가/해제 토글 |
 | GET | `/my-bookmark-list/{userIdx}` | 내 즐겨찾기 kakaoId 목록 |
 | GET | `/details` | 마이페이지용 즐겨찾기 상세 (세션 필요) |
+
+### 리워드 `/api/rewards`
+| Method | Path | 설명 |
+| :--- | :--- | :--- |
+| GET | `/balance/{userIdx}` | 보유 포인트 잔액 (적립/차감 내역 합계) |
+
+### 쿠폰 `/api/coupons`
+| Method | Path | 설명 |
+| :--- | :--- | :--- |
+| POST | `/register` | 상인: 쿠폰 등록 (본인 소유 가게 검증) |
+| GET | `/my-store/{merchantUserIdx}` | 상인: 내 가게 쿠폰 목록 |
+| POST | `/delete/{couponIdx}?merchantUserIdx=` | 상인: 쿠폰 비활성화(소프트 삭제) |
+| GET | `/available` | 교환 가능한 쿠폰 목록 (활성·유효기간 내) |
+| POST | `/{couponIdx}/redeem?userIdx=` | 유저: 포인트로 쿠폰 교환 (잔액 확인 후 차감 + 발급) |
+| GET | `/my/{userIdx}` | 유저: 보유 쿠폰 목록 |
+| POST | `/use/{userCouponIdx}?userIdx=` | 유저: 쿠폰 사용 처리 |
 
 ### 마이페이지 (`/api/users`, `/api/merchants`, `/api/admins`)
 | Method | Path | 설명 |
@@ -127,6 +145,14 @@ src/main/java/com/hyeongju/crs/crs/
 | POST | `/reports/{reportIdx}/process?approve=` | 신고 처리(승인/반려) |
 
 > 서버 기동 후 Swagger UI에서 전체 스펙 확인 가능: `http://localhost:8080/swagger-ui.html`
+
+---
+
+## 리워드 / 쿠폰 동작 메모
+
+- **적립** — 혼잡도 제보(`/api/congestion/updateStatus`) 저장 시 시스템이 자동으로 포인트 적립. **같은 유저+같은 가게는 30분 쿨다운**(쿨다운 내 재제보는 기록은 되지만 적립은 제외)으로 어뷰징 방지.
+- **잔액** — 별도 잔액 컬럼 없이 `Reward` 장부의 합계(`SUM`)로 계산. 교환 시 음수 행을 추가해 차감하므로 항상 정확.
+- **쿠폰** — 상인이 **본인 소유의 승인된 가게**에만 등록(소유 검증). 유저는 보유 포인트로 교환 → `UserCoupon` 발급 + 포인트 차감(같은 트랜잭션) → 사용 처리. 등록 즉시 노출(현재 MVP는 관리자 검수 없음).
 
 ---
 
@@ -176,16 +202,17 @@ java -jar build/libs/crs-0.0.1-SNAPSHOT.jar
 2. **JWT가 미완성 스텁** — `JwtTokenProvider`(키 생성 메서드 주석 처리), `JwtAuthenticationFilter`(빈 클래스)가 껍데기 상태. 현재 인증은 세션에만 의존. JWT를 쓸지 세션으로 갈지 방향 확정 후 한쪽으로 정리 필요.
 3. **민감 정보 하드코딩 & 커밋됨** — `application.properties`에 DB root 비밀번호와 `app.jwtSecret`이 평문으로 들어가 git에 추적됨. → 환경변수/`application-local.properties`로 분리하고 `.gitignore` 처리, 노출된 시크릿은 교체 권장.
 
-### 기능 미구현
-4. **Reward(리워드) 기능** — `Reward` 엔티티만 존재하고 Repository/Service/Controller가 없음. 혼잡도 제보 보상 등 기획이 있다면 구현 필요.
-5. **세션 기반 API의 일관성** — 일부 컨트롤러는 세션의 `userIdx`를 검사하지만(`/mypage`, `/restaurants/register`), 리뷰·즐겨찾기 등은 `userIdx`를 요청 파라미터/바디로 받아 **본인 검증 없이 신뢰**함(타인 행세 가능). 인증 주체를 세션으로 통일 권장.
+### 기능 / 정합성
+4. **세션 기반 API의 일관성** — 일부 컨트롤러는 세션의 `userIdx`를 검사하지만(`/mypage`, `/restaurants/register`), 리뷰·즐겨찾기·리워드·쿠폰 등은 `userIdx`를 요청 파라미터/바디로 받아 **본인 검증 없이 신뢰**함(타인 행세 가능). 인증 주체를 세션으로 통일 권장.
+5. **쿠폰 동시 교환 방어 약함** — 포인트 차감이 트랜잭션 내 "잔액 확인 → 차감" 수준이라, 동시 요청 시 이중 차감 여지가 있음. 비관적 락 또는 원자적 차감 도입 권장.
+6. **관리자 쿠폰 검수 부재** — 상인이 등록한 쿠폰이 검수 없이 즉시 노출됨(의도된 MVP). 악성·허위 쿠폰 대비가 필요하면 쿠폰 승인제/신고 처리 추가.
 
 ### 코드 품질 / 운영
-6. **로깅** — 곳곳에 `System.out.println` 디버그 출력이 다수 남아 있음. SLF4J 로거로 교체 권장.
-7. **파일 업로드 경로 하드코딩** — `RestaurantService.uploadPath = "C:/upload/menu_picts/"` 가 Windows 절대경로로 고정. 설정값으로 외부화 + 정적 리소스 서빙 경로 정리 필요.
-8. **테스트 부재** — 기본 컨텍스트 로드 테스트(`CrsApplicationTests`) 외 단위/통합 테스트 없음.
-9. **예외 처리 산발적** — 컨트롤러마다 try/catch로 개별 처리. `@RestControllerAdvice` 전역 예외 처리로 통일하면 응답 형식 일관성↑.
-10. **응답 포맷 불일치** — 어떤 API는 엔티티를 직접 반환(`Restaurant`)하고 어떤 것은 DTO를 반환. 엔티티 직접 노출은 순환참조/과다노출 위험이 있어 DTO로 통일 권장.
+7. **로깅** — 곳곳에 `System.out.println` 디버그 출력이 다수 남아 있음. SLF4J 로거로 교체 권장.
+8. **파일 업로드 경로 하드코딩** — `RestaurantService.uploadPath = "C:/upload/menu_picts/"` 가 Windows 절대경로로 고정. 설정값으로 외부화 + 정적 리소스 서빙 경로 정리 필요.
+9. **테스트 부재** — 기본 컨텍스트 로드 테스트(`CrsApplicationTests`) 외 단위/통합 테스트 없음.
+10. **예외 처리 산발적** — 컨트롤러마다 try/catch로 개별 처리. `@RestControllerAdvice` 전역 예외 처리로 통일하면 응답 형식 일관성↑.
+11. **응답 포맷 불일치** — 어떤 API는 엔티티를 직접 반환(`Restaurant`)하고 어떤 것은 DTO를 반환. 엔티티 직접 노출은 순환참조/과다노출 위험이 있어 DTO로 통일 권장.
 
 ---
 
