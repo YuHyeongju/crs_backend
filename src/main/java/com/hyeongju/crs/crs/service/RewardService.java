@@ -31,6 +31,18 @@ public class RewardService {
         rewardRepository.save(reward);
     }
 
+    // 포인트 차감 (장부에 음수 행 1건 추가 → 잔액 SUM이 자동으로 줄어듦)
+    @Transactional
+    public void spendPoints(User user, Restaurant restaurant, int amount, String reason) {
+        Reward reward = new Reward();
+        reward.setUser(user);
+        reward.setRestaurant(restaurant);
+        reward.setTotalRewardValue(-amount);
+        reward.setRewardAt(LocalDateTime.now());
+        reward.setRewardReason(reason);
+        rewardRepository.save(reward);
+    }
+
     // 유저 보유 포인트 잔액 = 적립 내역 합계
     public int getBalance(int userIdx) {
         return rewardRepository.sumRewardValueByUserIdx(userIdx);
