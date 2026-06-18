@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.hyeongju.crs.crs.domain.User;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,10 @@ public class CongestionService {
     private final RestaurantRepository restaurantRepository;
     private final CongestionRepository congestionRepository;
     private final UserRepository userRepository;
+    private final RewardService rewardService;
+
+    // 혼잡도 제보 리워드 정책 (1단계 MVP) — 같은 가게는 30분에 한 번만 적립 인정
+    private static final long REPORT_COOLDOWN_MINUTES = 30;
 
     @Transactional
     public void changeCongStatus(CongestionUpdateDto dto){
@@ -40,6 +45,12 @@ public class CongestionService {
         User user = userRepository.findById(dto.getUserIdx())
                 .orElseThrow(() -> new IllegalStateException("해당하는 유저가 없음"));
 
+        // 적립 여부 판단은 '이번 제보 저장 전'에 확인해야 직전 제보 이력만 보게 됨
+        LocalDateTime cooldownStart = LocalDateTime.now().minusMinutes(REPORT_COOLDOWN_MINUTES);
+        boolean recentlyReported = congestionRepository
+                .existsByUserUserIdxAndRestaurantRestIdxAndCongAtAfter(
+                        user.getUserIdx(), restaurant.getRestIdx(), cooldownStart);
+
         Congestion congestion = new Congestion();
         congestion.setRestaurant(restaurant);
         congestion.setUser(user);
@@ -47,6 +58,10 @@ public class CongestionService {
 
         congestionRepository.save(congestion);
 
+        // 제보 자체는 항상 저장하고, 30분 쿨다운을 통과한 경우에만 포인트 지급 (어뷰징 방지)
+        if (!recentlyReported) {
+            rewardService.grantCongestionReward(user, restaurant);
+        }
     }
 
 

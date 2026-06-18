@@ -25,6 +25,13 @@ public class Reward {
     @JsonIgnore
     private User user;
 
+    // 어떤 가게 제보로 적립됐는지 (카카오 자동생성 가게 등도 있어 nullable)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "REST_IDX")
+    @JsonIgnore
+    private Restaurant restaurant;
+
+    // 적립 이벤트 1건당 지급된 포인트 (유저 잔액은 이 값들의 SUM으로 계산)
     @Column(name = "TOTAL_REWARD_VALUE",nullable = false)
     private int totalRewardValue;
 
