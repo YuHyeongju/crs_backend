@@ -128,6 +128,18 @@ public class RestaurantController {
 
 
 
+    @GetMapping("/edit/{restIdx}")
+    public ResponseEntity<?> getRestaurantForEdit(@PathVariable("restIdx") int restIdx, HttpSession session) {
+        Integer userIdx = (Integer) session.getAttribute("userIdx");
+        if (userIdx == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+
+        try {
+            return ResponseEntity.ok(restaurantService.getRestaurantForEdit(restIdx));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     @PostMapping(value = "/update/{restIdx}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateRestaurant(@PathVariable("restIdx")Integer restIdx,
                                               @RequestPart("dto") RestaurantRequestDto dto,

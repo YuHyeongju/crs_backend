@@ -63,6 +63,22 @@ public class CouponService {
                 .collect(Collectors.toList());
     }
 
+    // 쿠폰 수정 (소유 검증)
+    @Transactional
+    public void updateCoupon(int couponIdx, int merchantUserIdx, CouponRequestDto dto) {
+        Coupon coupon = couponRepository.findById(couponIdx)
+                .orElseThrow(() -> new IllegalStateException("쿠폰을 찾을 수 없습니다."));
+        if (coupon.getRestaurant().getUser() == null ||
+                coupon.getRestaurant().getUser().getUserIdx() != merchantUserIdx) {
+            throw new SecurityException("본인 쿠폰만 수정할 수 있습니다.");
+        }
+        if (dto.getPointCost() <= 0) throw new IllegalArgumentException("필요 포인트는 1 이상이어야 합니다.");
+        coupon.setTitle(dto.getTitle());
+        coupon.setDescription(dto.getDescription());
+        coupon.setPointCost(dto.getPointCost());
+        coupon.setValidUntil(dto.getValidUntil());
+    }
+
     // 쿠폰 비활성화 (소유 검증)
     @Transactional
     public void deactivateCoupon(int couponIdx, int merchantUserIdx) {

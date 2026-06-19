@@ -41,6 +41,23 @@ public class CouponController {
         return ResponseEntity.ok(couponService.getMyStoreCoupons(merchantUserIdx));
     }
 
+    // 쿠폰 수정
+    @PostMapping("/update/{couponIdx}")
+    public ResponseEntity<String> update(@PathVariable("couponIdx") int couponIdx,
+                                         @RequestParam("merchantUserIdx") int merchantUserIdx,
+                                         @RequestBody CouponRequestDto dto) {
+        try {
+            couponService.updateCoupon(couponIdx, merchantUserIdx, dto);
+            return ResponseEntity.ok("쿠폰이 수정되었습니다.");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
     // 쿠폰 비활성화
     @PostMapping("/delete/{couponIdx}")
     public ResponseEntity<String> delete(@PathVariable("couponIdx") int couponIdx,
