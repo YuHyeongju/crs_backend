@@ -77,10 +77,18 @@ public class CouponService {
 
     // ===================== 유저 =====================
 
-    // 교환 가능한 쿠폰 목록
+    // 교환 가능한 쿠폰 목록 (전체)
     @Transactional
     public List<CouponResponseDto> getAvailableCoupons() {
         return couponRepository.findAvailable(LocalDate.now()).stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+    // 특정 가게의 교환 가능한 쿠폰 목록
+    @Transactional
+    public List<CouponResponseDto> getAvailableCouponsByRestIdx(int restIdx) {
+        return couponRepository.findAvailableByRestIdx(restIdx, LocalDate.now()).stream()
                 .map(this::toResponseDto)
                 .collect(Collectors.toList());
     }

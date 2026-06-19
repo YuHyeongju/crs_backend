@@ -16,4 +16,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Integer> {
     // 유저에게 노출할 교환 가능한 쿠폰 (활성 + 유효기간 안 지남)
     @Query("SELECT c FROM Coupon c WHERE c.active = true AND (c.validUntil IS NULL OR c.validUntil >= :today)")
     List<Coupon> findAvailable(@Param("today") LocalDate today);
+
+    // 특정 가게의 교환 가능한 쿠폰
+    @Query("SELECT c FROM Coupon c WHERE c.restaurant.restIdx = :restIdx AND c.active = true AND (c.validUntil IS NULL OR c.validUntil >= :today)")
+    List<Coupon> findAvailableByRestIdx(@Param("restIdx") int restIdx, @Param("today") LocalDate today);
 }

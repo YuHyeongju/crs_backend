@@ -57,10 +57,16 @@ public class CouponController {
 
     // ===================== 유저 =====================
 
-    // 교환 가능 쿠폰 목록
+    // 교환 가능 쿠폰 목록 (전체)
     @GetMapping("/available")
     public ResponseEntity<List<CouponResponseDto>> available() {
         return ResponseEntity.ok(couponService.getAvailableCoupons());
+    }
+
+    // 특정 가게의 교환 가능 쿠폰 목록
+    @GetMapping("/available/restaurant/{restIdx}")
+    public ResponseEntity<List<CouponResponseDto>> availableByRestaurant(@PathVariable("restIdx") int restIdx) {
+        return ResponseEntity.ok(couponService.getAvailableCouponsByRestIdx(restIdx));
     }
 
     // 포인트로 쿠폰 교환

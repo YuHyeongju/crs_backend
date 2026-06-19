@@ -40,3 +40,6 @@ out/
 
 ### Frontend copy (separate repo, must not be tracked here) ###
 crs_frontend/
+
+### Secret properties (never commit) ###
+src/main/resources/application-secret.properties
