@@ -14,6 +14,8 @@ public class RestaurantRequestDto {
     private String restTel;
     private String restAddress;
     private String restBusiHours;
+    private Double latitude;
+    private Double longitude;
 
     private List<MenuList> menulist;
 

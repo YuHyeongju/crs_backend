@@ -4,6 +4,7 @@ import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.domain.RestaurantFacilities;
 import com.hyeongju.crs.crs.domain.RestaurantMenu;
 import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.dto.RestaurantPinDto;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
 import com.hyeongju.crs.crs.repository.RestaurantRepository;
@@ -84,17 +85,27 @@ public class RestaurantService {
         String merchantName = merchant.getName();
 
 
-        Restaurant restaurant = restaurantRepository.findByKakaoId(dto.getKakaoId())
-                .orElseGet(() -> {
-                    Restaurant newRestaurant = new Restaurant();
-                    newRestaurant.setKakaoId(dto.getKakaoId());
-                    return newRestaurant;
-                });
+        Restaurant restaurant = isBlank(dto.getKakaoId())
+                ? new Restaurant()
+                : restaurantRepository.findByKakaoId(dto.getKakaoId())
+                    .orElseGet(() -> {
+                        Restaurant newRestaurant = new Restaurant();
+                        newRestaurant.setKakaoId(dto.getKakaoId());
+                        return newRestaurant;
+                    });
+
+        // 이미 다른 상인이 등록(claim)한 가게면 거절 — 본인이 이미 가진 가게는 재등록(수정) 허용
+        if (restaurant.getUser() != null && restaurant.getUser().getUserIdx() != userIdx) {
+            throw new IllegalStateException("이미 다른 사업자가 등록한 가게입니다.");
+        }
 
         restaurant.setRestName(dto.getRestName());
         restaurant.setRestAddress(dto.getRestAddress());
         restaurant.setRestTel(dto.getRestTel());
         restaurant.setRestBusiHours(dto.getRestBusiHours());
+
+        if (dto.getLatitude() != null) restaurant.setLatitude(dto.getLatitude());
+        if (dto.getLongitude() != null) restaurant.setLongitude(dto.getLongitude());
 
         restaurant.setStatus("ACTIVE");
         restaurant.setApprovalStatus("PENDING");
@@ -377,6 +388,40 @@ public class RestaurantService {
             }
         }
         restaurantRepository.delete(restaurant);
+    }
+
+    public List<RestaurantPinDto> getApprovedMerchantPins() {
+        return restaurantRepository
+                .findByUserIsNotNullAndApprovalStatusAndLatitudeIsNotNullAndLongitudeIsNotNull("APPROVED")
+                .stream()
+                .map(this::toRestaurantPinDto)
+                .collect(Collectors.toList());
+    }
+
+    public RestaurantPinDto getRestaurantPinByRestIdx(int restIdx) {
+        Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(() -> new IllegalStateException("Restaurant not found: " + restIdx));
+
+        return toRestaurantPinDto(restaurant);
+    }
+
+    private RestaurantPinDto toRestaurantPinDto(Restaurant restaurant) {
+        Double averageRating = reviewRepository.findAverageRatingByRestaurantRestIdx(restaurant.getRestIdx())
+                .orElse(0.0);
+        Integer reviewCount = reviewRepository.countByRestaurantRestIdx(restaurant.getRestIdx());
+
+        return new RestaurantPinDto(
+                restaurant.getRestIdx(),
+                restaurant.getRestName(),
+                restaurant.getRestAddress(),
+                restaurant.getRestTel(),
+                restaurant.getLatitude(),
+                restaurant.getLongitude(),
+                restaurant.getKakaoId(),
+                Math.round(averageRating * 10.0) / 10.0,
+                reviewCount,
+                restaurant.getUser() != null ? restaurant.getUser().getUserIdx() : null
+        );
     }
 
     private void deleteActualFile(String fileName){

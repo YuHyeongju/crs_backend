@@ -51,7 +51,7 @@ public class Restaurant {
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
-    @BatchSize(size = 10) // Added for N+1 optimization
+    @BatchSize(size = 10) // N + 1 문제 해결
     @OneToMany(mappedBy = "restaurant", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Congestion> congestions = new ArrayList<>();
 
@@ -72,4 +72,10 @@ public class Restaurant {
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @Column(name = "LATITUDE")
+    private Double latitude;
+
+    @Column(name = "LONGITUDE")
+    private Double longitude;
 }

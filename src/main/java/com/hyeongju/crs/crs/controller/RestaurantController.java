@@ -2,6 +2,7 @@ package com.hyeongju.crs.crs.controller;
 
 
 import com.hyeongju.crs.crs.domain.Restaurant;
+import com.hyeongju.crs.crs.dto.RestaurantPinDto;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
 import com.hyeongju.crs.crs.service.RestaurantService;
@@ -61,6 +62,8 @@ public class RestaurantController {
 
             return ResponseEntity.ok(result);
 
+        }catch (IllegalStateException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }catch (Exception e){
             System.out.println(">>> [디버깅] 등록 실패한 DTO: " + dto.toString());
 
@@ -90,6 +93,16 @@ public class RestaurantController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("가게 목록을 조회할 수 없음" + e.getMessage());
         }
+    }
+
+    @GetMapping("/merchant-pins")
+    public ResponseEntity<List<RestaurantPinDto>> getMerchantPins() {
+        return ResponseEntity.ok(restaurantService.getApprovedMerchantPins());
+    }
+
+    @GetMapping("/restIdx/{restIdx}")
+    public ResponseEntity<RestaurantPinDto> getRestaurantByRestIdx(@PathVariable("restIdx") int restIdx) {
+        return ResponseEntity.ok(restaurantService.getRestaurantPinByRestIdx(restIdx));
     }
 
     @PostMapping("/bulkDetails")

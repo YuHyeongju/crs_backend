@@ -32,15 +32,7 @@ public class CongestionService {
 
     @Transactional
     public void changeCongStatus(CongestionUpdateDto dto){
-        Restaurant restaurant = restaurantRepository.findByKakaoId(dto.getKakaoId())
-                .orElseGet(()-> {
-                            Restaurant newRest = new Restaurant();
-                            newRest.setKakaoId(dto.getKakaoId());
-                            newRest.setRestName(dto.getRestName());
-                            newRest.setRestAddress(dto.getRestAddress());
-                            newRest.setRestTel(dto.getRestPhone());
-                            return restaurantRepository.save(newRest);
-                        });
+        Restaurant restaurant = findRestaurantForCongestion(dto);
 
         User user = userRepository.findById(dto.getUserIdx())
                 .orElseThrow(() -> new IllegalStateException("해당하는 유저가 없음"));
@@ -64,6 +56,23 @@ public class CongestionService {
         }
     }
 
+    private Restaurant findRestaurantForCongestion(CongestionUpdateDto dto) {
+        if (dto.getRestIdx() != null) {
+            return restaurantRepository.findByRestIdx(dto.getRestIdx())
+                    .orElseThrow(() -> new IllegalStateException("Restaurant not found: " + dto.getRestIdx()));
+        }
+
+        return restaurantRepository.findByKakaoId(dto.getKakaoId())
+                .orElseGet(()-> {
+                            Restaurant newRest = new Restaurant();
+                            newRest.setKakaoId(dto.getKakaoId());
+                            newRest.setRestName(dto.getRestName());
+                            newRest.setRestAddress(dto.getRestAddress());
+                            newRest.setRestTel(dto.getRestPhone());
+                            return restaurantRepository.save(newRest);
+                        });
+    }
+
 
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public String getCurrentcongestion(String kakaoId){
@@ -82,6 +91,22 @@ public class CongestionService {
                 }).orElse(CongestionStatus.NONE.getName());
 
 
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public String getCurrentCongestionByRestIdx(int restIdx){
+        return restaurantRepository.findByRestIdx(restIdx)
+                .map(this::getLatestCongestionName)
+                .orElse(CongestionStatus.NONE.getName());
+    }
+
+    private String getLatestCongestionName(Restaurant restaurant) {
+        List<Congestion> history = restaurant.getCongestions();
+        if(history == null || history.isEmpty()){
+            return CongestionStatus.NONE.getName();
+        }
+        history.sort((c1, c2) -> c2.getCongAt().compareTo(c1.getCongAt()));
+        return history.get(0).getCongStatus().getName();
     }
 
 

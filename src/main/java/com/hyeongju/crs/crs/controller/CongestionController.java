@@ -31,6 +31,11 @@ public class CongestionController {
         return ResponseEntity.ok(currentStatus);
     }
 
+    @GetMapping("/restIdx/{restIdx}")
+    public ResponseEntity<String> getCurrentCongestionByRestIdx(@PathVariable("restIdx") int restIdx){
+        return ResponseEntity.ok(congestionService.getCurrentCongestionByRestIdx(restIdx));
+    }
+
     @PostMapping("/bulkStatus")
     public ResponseEntity<Map<String, String>> getCurrentCongstionAll(@RequestBody List<String> kakaoIds){
         System.out.println("==========================================================");

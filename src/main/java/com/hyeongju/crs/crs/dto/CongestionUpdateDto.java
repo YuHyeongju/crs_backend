@@ -11,6 +11,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class CongestionUpdateDto {
     private int userIdx;
+    private Integer restIdx;
     private String kakaoId;
     private String congStatus;
     private String restName;

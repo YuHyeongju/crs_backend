@@ -18,7 +18,9 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
 
     List <Restaurant> findByApprovalStatusAndStatus(String approvalStatus, String status);
 
-    List<Restaurant> findByKakaoIdIn(List<String> kakaoIds);
+    List<Restaurant> findByKakaoIdIn(List<String> kakaoIds); // 여러개 kakaoId 한 번에 조회
 
     List <Restaurant> findByUserUserIdxAndApprovalStatus(int userIdx, String approvalStatus);
+
+    List<Restaurant> findByUserIsNotNullAndApprovalStatusAndLatitudeIsNotNullAndLongitudeIsNotNull(String approvalStatus);
 }
