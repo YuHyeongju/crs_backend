@@ -1,4 +1,5 @@
 HELP.md
+troubleshooting_N1_congestion.md
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
