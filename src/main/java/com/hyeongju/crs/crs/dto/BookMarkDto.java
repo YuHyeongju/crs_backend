@@ -11,6 +11,7 @@ public class BookMarkDto {
 
     private int userIdx;
     private String kakaoId;
+    private Integer restIdx;
     private String restName;
     private String restAddress;
     private String restTel;

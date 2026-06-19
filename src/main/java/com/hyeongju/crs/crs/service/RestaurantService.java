@@ -36,6 +36,11 @@ public class RestaurantService {
 
 
 
+    public Restaurant getRestaurantByRestIdx(int restIdx) {
+        return restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(() -> new IllegalArgumentException("가게를 찾을 수 없습니다: " + restIdx));
+    }
+
     @Transactional
     public Restaurant getOrCreateRestaurant(String kakaoId, String restName, String restAddress, String restTel) {
 

@@ -23,13 +23,17 @@ public class BookmarkService {
     @Transactional
     public String toggleBookMark(User user, BookMarkDto dto){
 
+        System.out.println(">>> [북마크] kakaoId=" + dto.getKakaoId() + " restIdx=" + dto.getRestIdx());
 
-        Restaurant newRestaurant = restaurantService.getOrCreateRestaurant(
-                dto.getKakaoId(),
-                dto.getRestName(),
-                dto.getRestAddress(),
-                dto.getRestTel()
-        );
+        Restaurant newRestaurant;
+        if (dto.getRestIdx() != null) {
+            newRestaurant = restaurantService.getRestaurantByRestIdx(dto.getRestIdx());
+        } else if (dto.getKakaoId() != null) {
+            newRestaurant = restaurantService.getOrCreateRestaurant(
+                    dto.getKakaoId(), dto.getRestName(), dto.getRestAddress(), dto.getRestTel());
+        } else {
+            throw new IllegalArgumentException("restIdx 또는 kakaoId 중 하나는 필수입니다.");
+        }
 
         Optional<BookMark> existingBookMark = bookMarkRepository.findByUserAndRestaurant(user,newRestaurant);
 
@@ -49,8 +53,10 @@ public class BookmarkService {
     public List<String> getBookmarkKakaoIds(int userIdx){
         List<BookMark> bookmarks = bookMarkRepository.findByUserUserIdx(userIdx);
 
-        return bookmarks.stream().map(bm -> bm.getRestaurant().getKakaoId())
-                .collect(Collectors.toList());
+        return bookmarks.stream().map(bm -> {
+            String kakaoId = bm.getRestaurant().getKakaoId();
+            return kakaoId != null ? kakaoId : "db-" + bm.getRestaurant().getRestIdx();
+        }).collect(Collectors.toList());
     }
 
     public List<BookMarkDto> getBookmarkListForMypage(int userIdx) {
