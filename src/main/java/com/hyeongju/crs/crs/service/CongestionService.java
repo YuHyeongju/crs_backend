@@ -62,7 +62,14 @@ public class CongestionService {
                     .orElseThrow(() -> new IllegalStateException("Restaurant not found: " + dto.getRestIdx()));
         }
 
+        if (dto.getKakaoId() != null && dto.getKakaoId().startsWith("db-")) {
+            int restIdx = Integer.parseInt(dto.getKakaoId().substring(3));
+            return restaurantRepository.findByRestIdx(restIdx)
+                    .orElseThrow(() -> new IllegalStateException("Restaurant not found: " + restIdx));
+        }
+
         return restaurantRepository.findByKakaoId(dto.getKakaoId())
+                .or(() -> restaurantRepository.findByRestTel(dto.getRestPhone()))
                 .orElseGet(()-> {
                             Restaurant newRest = new Restaurant();
                             newRest.setKakaoId(dto.getKakaoId());

@@ -65,8 +65,7 @@ public class BookmarkService {
         return bookMarks.stream().map(bm -> {
             BookMarkDto dto = new BookMarkDto();
             dto.setKakaoId(bm.getRestaurant().getKakaoId());
-            dto.setRestIdx(bm.getRestaurant().getRestIdx());
-            dto.setRestName(bm.getRestaurant().getRestName());
+            dto.setRestIdx(bm.getRestaurant().getRestIdx());dto.setRestName(bm.getRestaurant().getRestName());
             dto.setRestAddress(bm.getRestaurant().getRestAddress());
             dto.setRestTel(bm.getRestaurant().getRestTel());
             dto.setUserIdx(userIdx);

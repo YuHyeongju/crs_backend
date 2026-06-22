@@ -23,4 +23,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Integer>
     List <Restaurant> findByUserUserIdxAndApprovalStatus(int userIdx, String approvalStatus);
 
     List<Restaurant> findByUserIsNotNullAndApprovalStatusAndLatitudeIsNotNullAndLongitudeIsNotNull(String approvalStatus);
+
+    Optional<Restaurant> findByRestTel(String restTel);
 }
