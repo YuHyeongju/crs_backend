@@ -17,7 +17,7 @@
 | Framework | Spring Boot 3.5.6 (Web, Data JPA, Validation, Security) |
 | ORM | Hibernate / Spring Data JPA |
 | DB | MySQL 8 |
-| 인증 | HttpSession 기반 로그인 + BCrypt 비밀번호 암호화 |
+| 인증 | JWT (Access Token 30분 + Refresh Token 쿠키) + BCrypt 비밀번호 암호화 |
 | API 문서 | springdoc-openapi (Swagger UI) |
 | Build | Gradle (Gradle Wrapper 포함) |
 
@@ -34,7 +34,7 @@ src/main/java/com/hyeongju/crs/crs/
 ├── repository/                  # Spring Data JPA 리포지토리
 ├── domain/                      # JPA 엔티티 / Enum
 ├── dto/                         # 요청·응답 DTO
-└── security/                    # JwtTokenProvider, JwtAuthenticationFilter (현재 미사용 스텁)
+└── security/                    # JwtUtil (토큰 생성/검증), JwtAuthenticationFilter (요청별 토큰 검사)
 ```
 
 ---
@@ -64,8 +64,9 @@ src/main/java/com/hyeongju/crs/crs/
 | POST | `/register/user` | 일반 사용자 회원가입 |
 | POST | `/register/merchant` | 상인 회원가입 (사업자번호 검증) |
 | POST | `/register/admin` | 관리자 회원가입 (관리자 코드 검증) |
-| POST | `/login` | 로그인 (세션 생성, userIdx/role/name 반환) |
-| POST | `/logout` | 로그아웃 (세션 무효화) |
+| POST | `/login` | 로그인 (Access Token JSON 반환 + Refresh Token HttpOnly 쿠키 설정) |
+| POST | `/refresh` | Access Token 재발급 (Refresh Token 쿠키로 자동 갱신) |
+| POST | `/logout` | 로그아웃 (DB Refresh Token 삭제 + 쿠키 만료) |
 | POST | `/withdraw?id=` | 회원 탈퇴 |
 
 ### 식당 `/api/restaurants`
@@ -188,7 +189,7 @@ java -jar build/libs/crs-0.0.1-SNAPSHOT.jar
 ## 아키텍처 메모
 
 - **계층 구조**: Controller → Service → Repository(JPA) → MySQL
-- **인증 방식**: 로그인 시 `HttpSession`에 `userIdx`/`id` 저장. 보호가 필요한 API는 컨트롤러에서 세션을 직접 확인.
+- **인증 방식**: JWT 기반 Stateless 인증. 로그인 시 Access Token(30분)을 JSON으로 반환하고, Refresh Token(로그인 기억 시 30일 / 미체크 시 세션 쿠키)을 HttpOnly 쿠키로 설정. 모든 요청은 `JwtAuthenticationFilter`를 통과하며, 유효한 토큰이면 `request.setAttribute("authenticatedUserIdx", userIdx)`로 컨트롤러에 전달.
 - **N+1 최적화**: 지도에서 다수 식당의 혼잡도를 조회할 때 발생하던 N+1 문제를 `Restaurant.congestions`에 `@BatchSize(size = 10)`을 적용해 해결. 상세 내용은 [`troubleshooting_N1_congestion.md`](./troubleshooting_N1_congestion.md).
 
 ---
@@ -197,13 +198,12 @@ java -jar build/libs/crs-0.0.1-SNAPSHOT.jar
 
 코드 전반을 점검한 결과, 다음 항목들이 미완성이거나 보강이 필요합니다. (우선순위 순)
 
-### 보안 (가장 시급)
-1. **인증/인가가 사실상 비활성화** — `SecurityConfig`가 `anyRequest().permitAll()`로 모든 경로를 무방비 허용. 관리자 API(`/api/admins/**`)에 **역할 검사가 전혀 없어** 누구나 가게 승인·회원 제재·신고 처리가 가능. → 역할 기반 접근 제어(`hasRole`) 도입 필요.
-2. **JWT가 미완성 스텁** — `JwtTokenProvider`(키 생성 메서드 주석 처리), `JwtAuthenticationFilter`(빈 클래스)가 껍데기 상태. 현재 인증은 세션에만 의존. JWT를 쓸지 세션으로 갈지 방향 확정 후 한쪽으로 정리 필요.
-3. **민감 정보 하드코딩 & 커밋됨** — `application.properties`에 DB root 비밀번호와 `app.jwtSecret`이 평문으로 들어가 git에 추적됨. → 환경변수/`application-local.properties`로 분리하고 `.gitignore` 처리, 노출된 시크릿은 교체 권장.
+### 보안
+1. **역할 기반 접근 제어 미적용** — `SecurityConfig`가 `anyRequest().permitAll()`로 모든 경로를 허용. 관리자 API(`/api/admins/**`)에 역할 검사 없음. → `hasRole` 도입 필요.
+2. **민감 정보 하드코딩 & 커밋됨** — `application.properties`에 DB 비밀번호와 `app.jwtSecret`이 평문으로 들어가 git에 추적됨. → 환경변수/`application-local.properties`로 분리 권장.
 
 ### 기능 / 정합성
-4. **세션 기반 API의 일관성** — 일부 컨트롤러는 세션의 `userIdx`를 검사하지만(`/mypage`, `/restaurants/register`), 리뷰·즐겨찾기·리워드·쿠폰 등은 `userIdx`를 요청 파라미터/바디로 받아 **본인 검증 없이 신뢰**함(타인 행세 가능). 인증 주체를 세션으로 통일 권장.
+3. **본인 검증 일관성** — 리뷰·즐겨찾기·리워드·쿠폰 등 일부 API는 `userIdx`를 요청 파라미터/바디로 받아 JWT 주체와 대조하지 않음(타인 행세 가능). JWT `authenticatedUserIdx`로 통일 권장.
 5. **쿠폰 동시 교환 방어 약함** — 포인트 차감이 트랜잭션 내 "잔액 확인 → 차감" 수준이라, 동시 요청 시 이중 차감 여지가 있음. 비관적 락 또는 원자적 차감 도입 권장.
 6. **관리자 쿠폰 검수 부재** — 상인이 등록한 쿠폰이 검수 없이 즉시 노출됨(의도된 MVP). 악성·허위 쿠폰 대비가 필요하면 쿠폰 승인제/신고 처리 추가.
 

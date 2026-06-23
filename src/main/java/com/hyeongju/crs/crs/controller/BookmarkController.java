@@ -54,8 +54,8 @@ public class BookmarkController {
         return ResponseEntity.ok(bookmarkIds);
     }
     @GetMapping("/details")
-    public ResponseEntity<List<BookMarkDto>> getMyBookmarkDetails(HttpSession session){
-        Integer userIdx = (Integer) session.getAttribute("userIdx");
+    public ResponseEntity<List<BookMarkDto>> getMyBookmarkDetails(jakarta.servlet.http.HttpServletRequest request){
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
 
         if(userIdx == null){
             return ResponseEntity.status(401).build();

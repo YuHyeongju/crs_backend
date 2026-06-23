@@ -1,157 +1,150 @@
 package com.hyeongju.crs.crs.controller;
+
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
 import com.hyeongju.crs.crs.dto.UserLoginDto;
 import com.hyeongju.crs.crs.dto.UserRegistractionDto;
+import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.security.JwtUtil;
 import com.hyeongju.crs.crs.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.hyeongju.crs.crs.domain.User;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @RestController
-@RequiredArgsConstructor //final 생성자 자동 생성
+@RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST,
-        RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class AuthController {
 
     private final AuthService authService;
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/register/user")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistractionDto registractionDto){
-        // ID 중복 체크
-        if(authService.existsById(registractionDto.getId())){
-            return new ResponseEntity<>("이미 존재하는 ID 입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 휴대폰 번호 중복 체크
-        if(authService.existsByPhone(registractionDto.getPhone())){
-            return new ResponseEntity<>("이미 존재하는 휴대폰 번호 입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 비밀번호와 비밀번호 확인이 일치하는지 확인
-        if(!registractionDto.getPw().equals(registractionDto.getConfirmPw())){
-            return new ResponseEntity<>("비밀번호와 비밀번호 확인이 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 모든 중복 및 유효성 검사 끝나면 서비스로 등록
-        authService.registerUser(registractionDto);
-        // 성공 메시지
-        return new ResponseEntity<>("회원가입 성공", HttpStatus.CREATED);
+    public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistractionDto dto) {
+        if (authService.existsById(dto.getId()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 ID 입니다.");
+        if (authService.existsByPhone(dto.getPhone()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 휴대폰 번호 입니다.");
+        if (!dto.getPw().equals(dto.getConfirmPw()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        authService.registerUser(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
     }
 
     @PostMapping("/register/merchant")
-    public ResponseEntity<String> registerMerchant(@Valid @RequestBody MerchantRegistractionDto registractionDto){
-        // ID 중복 체크
-        if(authService.existsById(registractionDto.getId())){
-            return new ResponseEntity<>("이미 존재하는 ID 입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 휴대폰 번호 중복 체크
-        if(authService.existsByPhone(registractionDto.getPhone())){
-            return new ResponseEntity<>("이미 존재하는 휴대폰 번호 입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 비밀번호와 비밀번호 확인이 일치하는지 확인
-        if(!registractionDto.getPw().equals(registractionDto.getConfirmPw())){
-            return new ResponseEntity<>("비밀번호와 비밀번호 확인이 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
-        }
-        //사업자 등록번호 중복 체크
-        if(authService.existsByBusinessNum(registractionDto.getBusinessNum())){
-            return new ResponseEntity<>("이미 등록된 사업자 등록 번호 입니다.",HttpStatus.BAD_REQUEST);
-        }
-
-        // 모든 중복 및 유효성 검사 끝나면 서비스로 등록
-        authService.registerMerchant(registractionDto);
-
-        // 성공 메시지
-        return new ResponseEntity<>("상인 회원가입 성공", HttpStatus.CREATED);
+    public ResponseEntity<String> registerMerchant(@Valid @RequestBody MerchantRegistractionDto dto) {
+        if (authService.existsById(dto.getId()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 ID 입니다.");
+        if (authService.existsByPhone(dto.getPhone()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 휴대폰 번호 입니다.");
+        if (!dto.getPw().equals(dto.getConfirmPw()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        if (authService.existsByBusinessNum(dto.getBusinessNum()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 등록된 사업자 등록 번호 입니다.");
+        authService.registerMerchant(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("상인 회원가입 성공");
     }
 
     @PostMapping("/register/admin")
-    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistractionDto registractionDto){
-        // ID 중복 체크
-        if(authService.existsById(registractionDto.getId())){
-            return new ResponseEntity<>("이미 존재하는 ID입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 휴대폰 번호 중복 체크
-        if(authService.existsByPhone(registractionDto.getPhone())){
-            return new ResponseEntity<>("이미 존재하는 휴대폰 번호 입니다.",HttpStatus.BAD_REQUEST);
-        }
-        // 비밀번호와 비밀번호 확인이 일치하는지 확인
-        if(!registractionDto.getPw().equals(registractionDto.getConfirmPw())){
-            return new ResponseEntity<>("비밀번호와 비밀번호 확인이 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
-        }
-        //관리자 코드 중복 체크
-        if(authService.existsByAdminNum(registractionDto.getAdminNum())){
-            return new ResponseEntity<>("이미 등록된 관리자 코드 입니다.",HttpStatus.BAD_REQUEST);
-        }
-
-        // 모든 중복 및 유효성 검사 끝나면 서비스로 등록
-        authService.registerAdmin(registractionDto);
-
-        // 성공 메시지
-        return new ResponseEntity<>("관리자 회원가입 성공", HttpStatus.CREATED);
+    public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistractionDto dto) {
+        if (authService.existsById(dto.getId()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 ID입니다.");
+        if (authService.existsByPhone(dto.getPhone()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 존재하는 휴대폰 번호 입니다.");
+        if (!dto.getPw().equals(dto.getConfirmPw()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        if (authService.existsByAdminNum(dto.getAdminNum()))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이미 등록된 관리자 코드 입니다.");
+        authService.registerAdmin(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body("관리자 회원가입 성공");
     }
 
-
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody UserLoginDto loginDto, HttpServletRequest request){
+    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
         try {
-            User user = authService.authenticate(loginDto.getId(), loginDto.getPw());
+            User user = authService.authenticate(dto.getId(), dto.getPw());
+            String role = user.getRole().getRoleName().name();
 
-            HttpSession session = request.getSession();
-            session.setAttribute("id",user.getId());
-            session.setAttribute("userIdx",user.getUserIdx());
+            String accessToken = jwtUtil.generateAccessToken(user.getUserIdx(), role);
+            String refreshToken = authService.issueRefreshToken(user.getUserIdx(), dto.isRememberMe());
 
-            //프론트가 필요한 정보 전달
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("userIdx",user.getUserIdx());
-            responseData.put("role", user.getRole() != null && user.getRole().getRoleName() != null ? user.getRole().getRoleName().name() : "UNKNOWN"); // Added null check for role
-            responseData.put("name",user.getName());
-            responseData.put("message","로그인 성공");
+            // Refresh Token → HttpOnly 쿠키
+            // rememberMe=true: 30일 영구 쿠키 / false: 세션 쿠키 (브라우저 닫으면 삭제)
+            ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("refreshToken", refreshToken)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .sameSite("Lax");
+            if (dto.isRememberMe()) {
+                cookieBuilder.maxAge(30 * 24 * 60 * 60);
+            }
+            ResponseCookie cookie = cookieBuilder.build();
+            response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-            return ResponseEntity.ok(responseData);
+            Map<String, Object> body = new HashMap<>();
+            body.put("accessToken", accessToken);
+            body.put("userIdx", user.getUserIdx());
+            body.put("role", role);
+            body.put("name", user.getName());
+            return ResponseEntity.ok(body);
 
         } catch (RuntimeException e) {
-            // 인증 실패
-            System.out.println("로그인 실패");
-            return new ResponseEntity<>(e.getMessage(),HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    // Access Token 재발급
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(
+            @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰이 없습니다.");
+        try {
+            Map<String, Object> result = authService.refreshAccessToken(refreshToken);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logoutUser(HttpServletRequest request){
-        authService.logout(request);
-
-        System.out.println("로그아웃 성공");
-        
+    public ResponseEntity<String> logout(
+            @CookieValue(value = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response) {
+        if (refreshToken != null) {
+            authService.deleteRefreshToken(refreshToken);
+        }
+        ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true).path("/").maxAge(0).build();
+        response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<String> withdraw(@RequestParam("id") String id, HttpServletRequest request){
-        try{  // 이름을 명시해줘야함.
+    public ResponseEntity<String> withdraw(
+            @RequestParam("id") String id,
+            @CookieValue(value = "refreshToken", required = false) String refreshToken,
+            HttpServletResponse response) {
+        try {
             authService.withdraw(id);
-
-            HttpSession session = request.getSession(false);
-
-            if(session != null){
-                session.invalidate();
-            }
-
-            System.out.println("회원 탈퇴 성공");
-
+            if (refreshToken != null) authService.deleteRefreshToken(refreshToken);
+            ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
+                    .httpOnly(true).path("/").maxAge(0).build();
+            response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
             return ResponseEntity.ok("회원 탈퇴가 완료 되었습니다.");
-
         } catch (Exception e) {
-            System.out.println("회원탈퇴 실패");
-            return new ResponseEntity<> (e.getMessage(),HttpStatus.UNAUTHORIZED);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
-
 }

@@ -58,16 +58,14 @@ public class CongestionController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(HttpSession session){
-        Integer userIdx= (Integer)session.getAttribute("userIdx");
+    public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(jakarta.servlet.http.HttpServletRequest request){
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
 
         if(userIdx == null){
-            System.out.println("세션에 userIdx가 없습니다.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         List<MyCongestionResponseDto> result = congestionService.getMyCongestionHistory(userIdx);
         return ResponseEntity.ok(result);
-
     }
 }

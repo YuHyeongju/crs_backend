@@ -5,7 +5,6 @@ import com.hyeongju.crs.crs.domain.ReviewReport;
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,77 +15,57 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/admins")
-
 public class AdminController {
 
     private final AdminService adminService;
 
     @GetMapping("/mypage")
-    public ResponseEntity<?> getAdminProfile(HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("userIdx") == null){
-            // request.getAttribute는 들어온 요청에서 id를 찾는것
-            // session.getAttribute는 로그인 할 때 서버가 저장해둔 세션에서 찾는 것.
+    public ResponseEntity<?> getAdminProfile(HttpServletRequest request) {
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 만료되었습니다.");
-        }
-
-        int userIdx = (int)session.getAttribute("userIdx");
-
         try {
             MypageResponseDto dto = adminService.getAdminProfile(userIdx);
-
             return ResponseEntity.ok(dto);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
     @PostMapping("/mypage/updateAdmin")
-    public ResponseEntity<?> updateAdminProfile(@RequestBody AdminUpdateDto dto, HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("userIdx") == null){
+    public ResponseEntity<?> updateAdminProfile(@RequestBody AdminUpdateDto dto, HttpServletRequest request) {
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        int userIdx = (int)session.getAttribute("userIdx");
-
-        adminService.updateAdminProfile(userIdx,dto);
-
-        System.out.println("관리자 정보 수정 완료");
-
+        adminService.updateAdminProfile(userIdx, dto);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
-
     }
+
     @GetMapping("/pending")
-    public ResponseEntity<List<Restaurant>> getPendingList(){
+    public ResponseEntity<List<Restaurant>> getPendingList() {
         return ResponseEntity.ok(adminService.getPendingRestaurant());
     }
 
-
     @PostMapping("/approve/{restIdx}")
-    public ResponseEntity<String> approveRestaurant(@PathVariable ("restIdx") int restIdx){
+    public ResponseEntity<String> approveRestaurant(@PathVariable("restIdx") int restIdx) {
         adminService.approvalRestaurant(restIdx);
         return ResponseEntity.ok("가게가 성공적으로 승인되었습니다.");
     }
 
     @PostMapping("/reject/{restIdx}")
-    public ResponseEntity<String> rejectRestaurant(@PathVariable ("restIdx") int restIdx){
+    public ResponseEntity<String> rejectRestaurant(@PathVariable("restIdx") int restIdx) {
         adminService.rejectRestaurant(restIdx);
         return ResponseEntity.ok("가게 등록이 거절되었습니다.");
     }
 
     @GetMapping("/users")
     public ResponseEntity<List<UserListResponseDto>> getAllUsers() {
-        List<UserListResponseDto> users = adminService.getAllUsers();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(adminService.getAllUsers());
     }
 
     @GetMapping("/users/{userIdx}")
     public ResponseEntity<UserDetailsResponseDto> getUserDetails(@PathVariable("userIdx") int userIdx) {
-        UserDetailsResponseDto userDetails = adminService.getUserDetails(userIdx);
-        return ResponseEntity.ok(userDetails);
+        return ResponseEntity.ok(adminService.getUserDetails(userIdx));
     }
 
     @PostMapping("/users/{userIdx}/sanction")
@@ -100,7 +79,7 @@ public class AdminController {
         }
     }
 
-    @PostMapping("/users/{userIdx}/deactivate") // New endpoint for deactivating a user
+    @PostMapping("/users/{userIdx}/deactivate")
     public ResponseEntity<String> deactivateUser(@PathVariable("userIdx") int userIdx) {
         try {
             adminService.deactivateUser(userIdx);
@@ -110,20 +89,17 @@ public class AdminController {
         }
     }
 
-    // Review Report Management Endpoints
     @GetMapping("/reports")
     public ResponseEntity<List<ReviewReport>> getAllReviewReports() {
-        List<ReviewReport> reports = adminService.getAllReviewReports();
-        return ResponseEntity.ok(reports);
+        return ResponseEntity.ok(adminService.getAllReviewReports());
     }
 
     @GetMapping("/reports/{reportIdx}")
     public ResponseEntity<ReviewReport> getReviewReportDetails(@PathVariable("reportIdx") int reportIdx) {
         try {
-            ReviewReport report = adminService.getReviewReportDetails(reportIdx);
-            return ResponseEntity.ok(report);
+            return ResponseEntity.ok(adminService.getReviewReportDetails(reportIdx));
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null); // Or a custom error DTO
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -138,5 +114,3 @@ public class AdminController {
         }
     }
 }
-
-

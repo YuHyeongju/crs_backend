@@ -4,7 +4,6 @@ import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.dto.UserUpdateDto;
 import com.hyeongju.crs.crs.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,48 +11,30 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")
-@RequiredArgsConstructor // final이 붙은 필드의 생성자를 자동으로 만들어줌
+@RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/mypage")
-    public ResponseEntity<?> getUserProfile(HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("userIdx") == null){
-            // request.getAttribute는 들어온 요청에서 id를 찾는것
-            // session.getAttribute는 로그인 할 때 서버가 저장해둔 세션에서 찾는 것.
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 만료되었습니다.");
-        }
-
-        int userIdx = (int)session.getAttribute("userIdx");
-
+    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (userIdx == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
             MypageResponseDto dto = userService.getUserProfile(userIdx);
-
             return ResponseEntity.ok(dto);
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 
-
     @PostMapping("/mypage/updateUser")
-    public ResponseEntity<?> updateUserProfile(@RequestBody UserUpdateDto dto,HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-
-        if(session == null || session.getAttribute("userIdx") == null){
+    public ResponseEntity<?> updateUserProfile(@RequestBody UserUpdateDto dto, HttpServletRequest request) {
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        }
-
-        int userIdx = (int)session.getAttribute("userIdx");
-
-        userService.updateUserProfile(userIdx,dto);
-
-        System.out.println("일반 사용자 정보 수정 완료");
-
+        userService.updateUserProfile(userIdx, dto);
         return ResponseEntity.ok("회원 정보가 수정되었습니다.");
-        
     }
 }

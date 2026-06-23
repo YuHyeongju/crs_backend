@@ -35,4 +35,8 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT u FROM User u JOIN FETCH u.role WHERE u.userIdx = :userIdx")
     Optional<User> findByUserIdxWithRole(@Param("userIdx") int userIdx);
+
+    Optional<User> findByNameAndPhNum(String name, String phNum);
+
+    Optional<User> findByIdAndPhNum(String id, String phNum);
 }
