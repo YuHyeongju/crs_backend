@@ -1,6 +1,7 @@
 package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.domain.Restaurant;
+import com.hyeongju.crs.crs.dto.MenuResponseDto;
 import com.hyeongju.crs.crs.dto.RestaurantPinDto;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
@@ -70,6 +71,11 @@ public class RestaurantController {
     @GetMapping("/restIdx/{restIdx}")
     public ResponseEntity<RestaurantPinDto> getRestaurantByRestIdx(@PathVariable("restIdx") int restIdx) {
         return ResponseEntity.ok(restaurantService.getRestaurantPinByRestIdx(restIdx));
+    }
+
+    @GetMapping("/{restIdx}/menus")
+    public ResponseEntity<List<MenuResponseDto>> getMenusByRestIdx(@PathVariable("restIdx") int restIdx) {
+        return ResponseEntity.ok(restaurantService.getMenusByRestIdx(restIdx));
     }
 
     @PostMapping("/bulkDetails")

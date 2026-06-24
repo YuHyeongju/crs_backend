@@ -4,6 +4,7 @@ import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.domain.RestaurantFacilities;
 import com.hyeongju.crs.crs.domain.RestaurantMenu;
 import com.hyeongju.crs.crs.domain.User;
+import com.hyeongju.crs.crs.dto.MenuResponseDto;
 import com.hyeongju.crs.crs.dto.RestaurantPinDto;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
@@ -379,6 +380,19 @@ public class RestaurantService {
         return restaurant;
     }
 
+
+    public List<MenuResponseDto> getMenusByRestIdx(int restIdx) {
+        Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
+                .orElseThrow(() -> new IllegalStateException("해당 식당 정보를 찾을 수 없음: " + restIdx));
+        return restaurant.getMenuList().stream()
+                .map(menu -> new MenuResponseDto(
+                        menu.getMenuIdx(),
+                        menu.getMenuName(),
+                        menu.getMenuPrice(),
+                        menu.getMenuPict() != null ? "http://localhost:8080/uploads/" + menu.getMenuPict() : null
+                ))
+                .collect(Collectors.toList());
+    }
 
     @Transactional
     public void deleteRestaurant(int restIdx){
