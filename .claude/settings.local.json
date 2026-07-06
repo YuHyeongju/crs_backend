@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell(.\\\\gradlew.bat compileJava -q)"
-    ]
-  }
-}
