@@ -1,7 +1,6 @@
 package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.domain.Restaurant;
-import com.hyeongju.crs.crs.domain.ReviewReport;
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -90,12 +89,12 @@ public class AdminController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<List<ReviewReport>> getAllReviewReports() {
+    public ResponseEntity<List<ReviewReportResponseDto>> getAllReviewReports() {
         return ResponseEntity.ok(adminService.getAllReviewReports());
     }
 
     @GetMapping("/reports/{reportIdx}")
-    public ResponseEntity<ReviewReport> getReviewReportDetails(@PathVariable("reportIdx") int reportIdx) {
+    public ResponseEntity<ReviewReportResponseDto> getReviewReportDetails(@PathVariable("reportIdx") int reportIdx) {
         try {
             return ResponseEntity.ok(adminService.getReviewReportDetails(reportIdx));
         } catch (RuntimeException e) {

@@ -156,13 +156,16 @@ public class AdminService extends AbstractRegistrationService {
     }
 
     // Review Report Management
-    public List<ReviewReport> getAllReviewReports() {
-        return reviewReportRepository.findAll();
+    public List<ReviewReportResponseDto> getAllReviewReports() {
+        return reviewReportRepository.findAll().stream()
+                .map(ReviewReportResponseDto::new)
+                .collect(Collectors.toList());
     }
 
-    public ReviewReport getReviewReportDetails(int reportIdx) {
-        return reviewReportRepository.findById(reportIdx)
+    public ReviewReportResponseDto getReviewReportDetails(int reportIdx) {
+        ReviewReport report = reviewReportRepository.findById(reportIdx)
                 .orElseThrow(() -> new RuntimeException("Review report not found."));
+        return new ReviewReportResponseDto(report);
     }
 
     @Transactional

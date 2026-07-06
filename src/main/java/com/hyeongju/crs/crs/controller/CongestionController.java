@@ -45,7 +45,13 @@ public class CongestionController {
     }
 
     @PostMapping("/updateStatus")
-    public ResponseEntity<Void> updateCongestion(@RequestBody CongestionUpdateDto dto){
+    public ResponseEntity<Void> updateCongestion(@RequestBody CongestionUpdateDto dto,
+                                                  jakarta.servlet.http.HttpServletRequest request){
+        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (authedUserIdx == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        dto.setUserIdx(authedUserIdx);
         System.out.println("전달 받은 카카오 ID: " + dto.getKakaoId());
         System.out.println("전달 받은 혼잡도 상태: " + dto.getCongStatus());
         System.out.println("전달 받은 userIdx: " + dto.getUserIdx());
