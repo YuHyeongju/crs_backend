@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -23,12 +24,13 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true",
-        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class AuthController {
 
     private final AuthService authService;
     private final JwtUtil jwtUtil;
+
+    @Value("${app.cookie.secure}")
+    private boolean cookieSecure;
 
     @PostMapping("/register/user")
     public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistractionDto dto) {
@@ -83,7 +85,7 @@ public class AuthController {
             // rememberMe=true: 30일 영구 쿠키 / false: 세션 쿠키 (브라우저 닫으면 삭제)
             ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(cookieSecure)
                     .path("/")
                     .sameSite("Lax");
             if (dto.isRememberMe()) {
@@ -126,7 +128,7 @@ public class AuthController {
             authService.deleteRefreshToken(refreshToken);
         }
         ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true).path("/").maxAge(0).build();
+                .httpOnly(true).secure(cookieSecure).sameSite("Lax").path("/").maxAge(0).build();
         response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
@@ -140,7 +142,7 @@ public class AuthController {
             authService.withdraw(id);
             if (refreshToken != null) authService.deleteRefreshToken(refreshToken);
             ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
-                    .httpOnly(true).path("/").maxAge(0).build();
+                    .httpOnly(true).secure(cookieSecure).sameSite("Lax").path("/").maxAge(0).build();
             response.addHeader(HttpHeaders.SET_COOKIE, clearCookie.toString());
             return ResponseEntity.ok("회원 탈퇴가 완료 되었습니다.");
         } catch (Exception e) {

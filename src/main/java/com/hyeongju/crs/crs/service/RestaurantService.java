@@ -13,6 +13,7 @@ import com.hyeongju.crs.crs.repository.ReviewRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +34,11 @@ public class RestaurantService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
 
-    private final String uploadPath = "C:/upload/menu_picts/";
+    @Value("${app.upload.dir}")
+    private String uploadPath;
+
+    @Value("${app.base-url}")
+    private String baseUrl;
 
 
 
@@ -389,7 +394,7 @@ public class RestaurantService {
                         menu.getMenuIdx(),
                         menu.getMenuName(),
                         menu.getMenuPrice(),
-                        menu.getMenuPict() != null ? "http://localhost:8080/uploads/" + menu.getMenuPict() : null
+                        menu.getMenuPict() != null ? baseUrl + "/uploads/" + menu.getMenuPict() : null
                 ))
                 .collect(Collectors.toList());
     }
