@@ -44,5 +44,8 @@ crs_frontend/
 ### Secret properties (never commit) ###
 src/main/resources/application-secret.properties
 
+### Docker Compose env (never commit) ###
+.env
+
 ### Claude Code local settings (personal, may contain sensitive command history) ###
 .claude/settings.local.json

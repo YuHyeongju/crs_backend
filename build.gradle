@@ -44,3 +44,9 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+// Spring Boot 플러그인은 기본적으로 실행 가능한 boot jar 외에 의존성 없는 plain jar도 만드는데,
+// Dockerfile에서 build/libs/*.jar를 하나로 특정해서 COPY하기 위해 plain jar 생성을 끈다.
+tasks.named('jar') {
+	enabled = false
+}

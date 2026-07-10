@@ -1,0 +1,14 @@
+.git
+.gradle
+build
+out
+bin
+.idea
+.vscode
+*.iml
+HELP.md
+troubleshooting_N1_congestion.md
+CODE_ANNOTATED.txt
+src/main/resources/application-secret.properties
+.env
+.claude

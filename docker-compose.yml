@@ -1,0 +1,58 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: crs
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306" # 로컬 3306(기존 MySQL)과 충돌 방지, 필요할 때만 GUI 클라이언트로 접속용
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/crs?serverTimezone=Asia/Seoul&useUnicode=true&characterEncoding=utf8
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      # app.jwtSecret은 카멜케이스 키라 Spring의 env 매핑 규칙상 밑줄 없이 APP_JWTSECRET이어야 매칭됨
+      APP_JWTSECRET: ${APP_JWT_SECRET}
+      # 프론트(nginx)와 백엔드가 nginx 뒤에서 같은 origin으로 묶이므로
+      # base-url을 비워두면 이미지 경로가 "/uploads/..." 상대경로로 나가고,
+      # 브라우저는 이걸 지금 접속 중인 origin(nginx) 기준으로 풀어서 요청한다.
+      APP_BASE_URL: ""
+      CORS_ALLOWED_ORIGINS: http://localhost:3000
+      SPRING_MAIL_USERNAME: ${MAIL_USERNAME}
+      SPRING_MAIL_PASSWORD: ${MAIL_PASSWORD}
+    volumes:
+      - uploads_data:/app/uploads/menu_picts
+    ports:
+      - "8090:8080" # 프론트는 nginx를 통해서만 접근. 이 포트는 디버깅용 직접 접속 옵션
+
+  frontend:
+    build:
+      context: ../../crs_frontend/my-restaurant-app
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_KAKAO_MAPS_API_KEY: ${REACT_APP_KAKAO_MAPS_API_KEY}
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+
+volumes:
+  mysql_data:
+  uploads_data:
