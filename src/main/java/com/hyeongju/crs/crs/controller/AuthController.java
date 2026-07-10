@@ -135,11 +135,15 @@ public class AuthController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(
-            @RequestParam("id") String id,
+            HttpServletRequest request,
             @CookieValue(value = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response) {
         try {
-            authService.withdraw(id);
+            Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+            if (authedUserIdx == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+            }
+            authService.withdraw(authedUserIdx);
             if (refreshToken != null) authService.deleteRefreshToken(refreshToken);
             ResponseCookie clearCookie = ResponseCookie.from("refreshToken", "")
                     .httpOnly(true).secure(cookieSecure).sameSite("Lax").path("/").maxAge(0).build();

@@ -99,6 +99,12 @@ public class AuthService {
         if (!passwordEncoder.matches(rawPassword, user.getPw())) {
             throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
+        if ("WITHDRAWN".equals(user.getStatus())) {
+            throw new RuntimeException("탈퇴한 계정입니다.");
+        }
+        if (!"ACTIVE".equals(user.getStatus())) {
+            throw new RuntimeException("이용이 제한된 계정입니다. 관리자에게 문의하세요.");
+        }
         return user;
     }
 
@@ -150,12 +156,11 @@ public class AuthService {
     }
 
     @Transactional
-    public void withdraw(String id) {
-        if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("존재하지 않는 사용자 입니다.");
-        }
+    public void withdraw(int userIdx) {
+        User user = userRepository.findByUserIdx(userIdx)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자 입니다."));
+        user.setStatus("WITHDRAWN");
+        userRepository.save(user);
     }
 
     private com.hyeongju.crs.crs.domain.Role getRoleByName(RoleName roleName) {

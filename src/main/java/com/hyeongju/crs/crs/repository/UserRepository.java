@@ -28,8 +28,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // 관리자 코드를 기준으로 중복 확인
     boolean existsByAdminNum(String adminNum);
 
-    void deleteById(String id);
-
     @Query("SELECT u FROM User u JOIN FETCH u.role")
     List<User> findAllWithRole();
 
