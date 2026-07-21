@@ -73,7 +73,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserLoginDto dto, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto dto, HttpServletResponse response) {
         try {
             User user = authService.authenticate(dto.getId(), dto.getPw());
             String role = user.getRole().getRoleName().name();

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class RestaurantController {
     public ResponseEntity<?> registerRestaurant(@RequestPart("dto") RestaurantRequestDto dto,
                                                 @RequestPart(value = "menuImages", required = false)
                                                 List<MultipartFile> menuImages,
-                                                HttpServletRequest request) {
+                                                HttpServletRequest request) throws IOException {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
@@ -44,8 +45,6 @@ public class RestaurantController {
             return ResponseEntity.ok(result);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("등록 중에 오류 발생:" + e.getMessage());
         }
     }
 
@@ -54,12 +53,8 @@ public class RestaurantController {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        try {
-            List<RestaurantResponseDto> myRestaurants = restaurantService.getMyRestaurants(userIdx);
-            return ResponseEntity.ok(myRestaurants);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("가게 목록을 조회할 수 없음" + e.getMessage());
-        }
+        List<RestaurantResponseDto> myRestaurants = restaurantService.getMyRestaurants(userIdx);
+        return ResponseEntity.ok(myRestaurants);
     }
 
     @GetMapping("/merchant-pins")
@@ -112,16 +107,12 @@ public class RestaurantController {
                                               @RequestPart("dto") RestaurantRequestDto dto,
                                               @RequestPart(value = "menuImages", required = false)
                                               List<MultipartFile> menuImages,
-                                              HttpServletRequest request) {
+                                              HttpServletRequest request) throws IOException {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        try {
-            restaurantService.updateRestaurantByMerchant(restIdx, dto, menuImages);
-            return ResponseEntity.ok("가게 정보가 업데이트 되었습니다.");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("수정실패" + e.getMessage());
-        }
+        restaurantService.updateRestaurantByMerchant(restIdx, dto, menuImages);
+        return ResponseEntity.ok("가게 정보가 업데이트 되었습니다.");
     }
 
     @PostMapping("/delete/{restIdx}")
@@ -131,8 +122,6 @@ public class RestaurantController {
             return ResponseEntity.ok("식당 정보와 메뉴 사진이 모두 삭제 됨");
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("삭제 중에 오류가 발생했습니다." + e.getMessage());
         }
     }
 }
