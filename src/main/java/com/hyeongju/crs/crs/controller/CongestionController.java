@@ -5,6 +5,7 @@ import com.hyeongju.crs.crs.dto.CongestionUpdateDto;
 import com.hyeongju.crs.crs.dto.MyCongestionResponseDto;
 import com.hyeongju.crs.crs.service.CongestionService;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,7 @@ public class CongestionController {
     }
 
     @PostMapping("/updateStatus")
-    public ResponseEntity<Void> updateCongestion(@RequestBody CongestionUpdateDto dto,
+    public ResponseEntity<Void> updateCongestion(@Valid @RequestBody CongestionUpdateDto dto,
                                                   jakarta.servlet.http.HttpServletRequest request){
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {

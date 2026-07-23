@@ -5,6 +5,7 @@ import com.hyeongju.crs.crs.dto.CouponResponseDto;
 import com.hyeongju.crs.crs.dto.MyCouponResponseDto;
 import com.hyeongju.crs.crs.service.CouponService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class CouponController {
 
     // 쿠폰 등록
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody CouponRequestDto dto, HttpServletRequest request) {
+    public ResponseEntity<String> register(@Valid @RequestBody CouponRequestDto dto, HttpServletRequest request) {
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
@@ -56,7 +57,7 @@ public class CouponController {
     @PostMapping("/update/{couponIdx}")
     public ResponseEntity<String> update(@PathVariable("couponIdx") int couponIdx,
                                          @RequestParam("merchantUserIdx") int merchantUserIdx,
-                                         @RequestBody CouponRequestDto dto,
+                                         @Valid @RequestBody CouponRequestDto dto,
                                          HttpServletRequest request) {
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {

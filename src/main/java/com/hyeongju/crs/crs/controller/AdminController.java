@@ -4,6 +4,7 @@ import com.hyeongju.crs.crs.domain.Restaurant;
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.AdminService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +33,7 @@ public class AdminController {
     }
 
     @PostMapping("/mypage/updateAdmin")
-    public ResponseEntity<?> updateAdminProfile(@RequestBody AdminUpdateDto dto, HttpServletRequest request) {
+    public ResponseEntity<?> updateAdminProfile(@Valid @RequestBody AdminUpdateDto dto, HttpServletRequest request) {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");

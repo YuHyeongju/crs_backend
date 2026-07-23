@@ -6,6 +6,7 @@ import com.hyeongju.crs.crs.dto.ReviewRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewResponseDto;
 import com.hyeongju.crs.crs.service.ReviewService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,7 +32,7 @@ public class ReviewController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerReview(@RequestBody ReviewRequestDto requestDto, HttpServletRequest request){
+    public ResponseEntity<String> registerReview(@Valid @RequestBody ReviewRequestDto requestDto, HttpServletRequest request){
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
@@ -75,7 +76,7 @@ public class ReviewController {
 
     @PutMapping("/{reviewIdx}")
     public ResponseEntity<String> updateMyReview(@PathVariable("reviewIdx") int reviewIdx,
-                                                 @RequestBody ReviewRequestDto requestDto,
+                                                 @Valid @RequestBody ReviewRequestDto requestDto,
                                                  HttpServletRequest request) {
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {

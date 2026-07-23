@@ -4,6 +4,7 @@ import com.hyeongju.crs.crs.dto.MerchantUpdateDto;
 import com.hyeongju.crs.crs.dto.MypageResponseDto;
 import com.hyeongju.crs.crs.service.MerchantService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,7 +31,7 @@ public class MerchantController {
     }
 
     @PostMapping("/mypage/updateMerchant")
-    public ResponseEntity<?> updateMerchantProfile(@RequestBody MerchantUpdateDto dto, HttpServletRequest request) {
+    public ResponseEntity<?> updateMerchantProfile(@Valid @RequestBody MerchantUpdateDto dto, HttpServletRequest request) {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");

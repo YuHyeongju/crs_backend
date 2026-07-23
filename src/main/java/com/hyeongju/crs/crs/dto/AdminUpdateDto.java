@@ -1,5 +1,6 @@
 package com.hyeongju.crs.crs.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,5 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class AdminUpdateDto extends UserUpdateDto{
+
+    @NotBlank(message = "관리자 인증 코드는 필수 입력 값입니다.")
     private String adminNum;
 }

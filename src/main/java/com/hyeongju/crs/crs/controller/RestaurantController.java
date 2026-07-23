@@ -7,6 +7,7 @@ import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
 import com.hyeongju.crs.crs.service.RestaurantService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,14 +27,14 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping("/detail")
-    public ResponseEntity<Restaurant> restaurantDetail(@RequestBody RestaurantRequestDto dto) {
+    public ResponseEntity<Restaurant> restaurantDetail(@Valid @RequestBody RestaurantRequestDto dto) {
         Restaurant restaurant = restaurantService.getOrCreateRestaurant(
                 dto.getKakaoId(), dto.getRestName(), dto.getRestAddress(), dto.getRestTel());
         return ResponseEntity.ok(restaurant);
     }
 
     @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> registerRestaurant(@RequestPart("dto") RestaurantRequestDto dto,
+    public ResponseEntity<?> registerRestaurant(@Valid @RequestPart("dto") RestaurantRequestDto dto,
                                                 @RequestPart(value = "menuImages", required = false)
                                                 List<MultipartFile> menuImages,
                                                 HttpServletRequest request) throws IOException {
@@ -104,7 +105,7 @@ public class RestaurantController {
 
     @PostMapping(value = "/update/{restIdx}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> updateRestaurant(@PathVariable("restIdx") Integer restIdx,
-                                              @RequestPart("dto") RestaurantRequestDto dto,
+                                              @Valid @RequestPart("dto") RestaurantRequestDto dto,
                                               @RequestPart(value = "menuImages", required = false)
                                               List<MultipartFile> menuImages,
                                               HttpServletRequest request) throws IOException {
