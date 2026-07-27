@@ -97,7 +97,9 @@ public class RestaurantController {
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
-            return ResponseEntity.ok(restaurantService.getRestaurantForEdit(restIdx));
+            return ResponseEntity.ok(restaurantService.getRestaurantForEdit(restIdx, userIdx));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -112,15 +114,26 @@ public class RestaurantController {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-        restaurantService.updateRestaurantByMerchant(restIdx, dto, menuImages);
-        return ResponseEntity.ok("가게 정보가 업데이트 되었습니다.");
+        try {
+            restaurantService.updateRestaurantByMerchant(restIdx, userIdx, dto, menuImages);
+            return ResponseEntity.ok("가게 정보가 업데이트 되었습니다.");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     @PostMapping("/delete/{restIdx}")
-    public ResponseEntity<String> deleteRestaurant(@PathVariable("restIdx") int restIdx) {
+    public ResponseEntity<String> deleteRestaurant(@PathVariable("restIdx") int restIdx, HttpServletRequest request) {
+        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        if (userIdx == null)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
-            restaurantService.deleteRestaurant(restIdx);
+            restaurantService.deleteRestaurant(restIdx, userIdx);
             return ResponseEntity.ok("식당 정보와 메뉴 사진이 모두 삭제 됨");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

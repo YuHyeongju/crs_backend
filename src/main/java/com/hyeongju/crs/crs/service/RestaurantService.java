@@ -291,10 +291,13 @@ public class RestaurantService {
 
 
     @Transactional
-    public RestaurantRequestDto getRestaurantForEdit(int restIdx) {
+    public RestaurantRequestDto getRestaurantForEdit(int restIdx, int userIdx) {
 
         Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
                 .orElseThrow(() -> new IllegalStateException("해당 식당 정보를 찾을 수 없음: " + restIdx));
+        if (restaurant.getUser() == null || restaurant.getUser().getUserIdx() != userIdx) {
+            throw new SecurityException("본인이 등록한 가게만 조회할 수 있습니다.");
+        }
 
 
         RestaurantRequestDto dto = new RestaurantRequestDto();
@@ -332,10 +335,13 @@ public class RestaurantService {
     }
 
     @Transactional
-    public Restaurant updateRestaurantByMerchant(int restIdx, RestaurantRequestDto dto,
+    public Restaurant updateRestaurantByMerchant(int restIdx, int userIdx, RestaurantRequestDto dto,
                                                  List<MultipartFile> menuImages) throws IOException {
         Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
                 .orElseThrow(() -> new IllegalStateException("수정할 식당 정보를 찾을 수 없음"));
+        if (restaurant.getUser() == null || restaurant.getUser().getUserIdx() != userIdx) {
+            throw new SecurityException("본인이 등록한 가게만 수정할 수 있습니다.");
+        }
         String merchantName = restaurant.getUser().getName();
 
         restaurant.setRestName(dto.getRestName());
@@ -400,9 +406,12 @@ public class RestaurantService {
     }
 
     @Transactional
-    public void deleteRestaurant(int restIdx){
+    public void deleteRestaurant(int restIdx, int userIdx){
         Restaurant restaurant = restaurantRepository.findByRestIdx(restIdx)
                 .orElseThrow(()-> new IllegalStateException("삭제할 식당을 찾을 수 없습니다."));
+        if (restaurant.getUser() == null || restaurant.getUser().getUserIdx() != userIdx) {
+            throw new SecurityException("본인이 등록한 가게만 삭제할 수 있습니다.");
+        }
 
         if(restaurant.getMenuList() != null){
             for(RestaurantMenu menu : restaurant.getMenuList()){
