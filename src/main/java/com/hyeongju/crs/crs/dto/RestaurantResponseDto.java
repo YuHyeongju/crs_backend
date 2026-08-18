@@ -9,10 +9,11 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantResponseDto {
+    // 식당 목록/검색 결과 응답 DTO (평점 통계 포함)
     private Integer restIdx;
     private String restName;
     private String restAddress;
-    private Double averageRating;
+    private Double averageRating;  // 리뷰가 없으면 null일 수 있음
     private Integer reviewCount;
-    private Integer ownerUserIdx;
+    private Integer ownerUserIdx;  // 카카오 자동생성 식당은 null
 }

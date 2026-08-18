@@ -11,7 +11,8 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CongestionUpdateDto {
-    private int userIdx;
+    // 혼잡도 제보 요청 DTO. 가게가 아직 DB에 없을 수 있어 restName/restAddress/restPhone으로 신규 등록도 지원
+    private int userIdx; // 컨트롤러에서 JWT 인증 정보로 덮어씀(클라이언트 값 신뢰하지 않음)
     private Integer restIdx;
     private String kakaoId;
 

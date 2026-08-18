@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class FindIdSendCodeDto {
+    // 아이디 찾기 1단계 요청 DTO: 이름+이메일로 본인 확인 후 인증코드 발송
     @NotBlank(message = "이름은 필수 입력 값입니다.")
     private String name;
 

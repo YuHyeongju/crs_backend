@@ -9,6 +9,7 @@ import java.io.File;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+    // 업로드된 메뉴 이미지를 "/uploads/**" URL로 접근 가능하게 매핑
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -21,8 +22,6 @@ public class WebConfig implements WebMvcConfigurer {
             dir.mkdirs();
         }
 
-        // toURI()는 OS에 따라 file:/C:/... (윈도우) 또는 file:/var/... (리눅스) 형태를 알맞게 만들어준다.
-        // 디렉터리가 실제로 존재해야 끝에 슬래시가 붙으므로 위에서 미리 생성한다.
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations(dir.toURI().toString());
     }

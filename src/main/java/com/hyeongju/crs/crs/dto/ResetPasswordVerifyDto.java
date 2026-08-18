@@ -8,6 +8,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class ResetPasswordVerifyDto {
+    // 비밀번호 재설정 2단계 요청 DTO: 인증코드 검증 후 새 비밀번호(정책 검증 포함)로 교체
     @NotBlank(message = "아이디는 필수 입력 값입니다.")
     private String id;
 

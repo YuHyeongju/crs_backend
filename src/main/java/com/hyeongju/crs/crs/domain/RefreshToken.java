@@ -20,7 +20,7 @@ public class RefreshToken {
     private String token;
 
     @Column(name = "user_idx", nullable = false)
-    private int userIdx;
+    private int userIdx;                               // 연관관계 매핑 없이 유저 번호만 저장
 
     @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;

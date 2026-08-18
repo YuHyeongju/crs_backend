@@ -8,9 +8,7 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Integer> {
 
-    // JPA가 SQL 자동 생성
-    // 사용자에게 부여할 역할이 무엇인지 판단하는 코드
+    // roleName으로 Role 엔티티 조회 (없으면 Optional.empty — 호출부가 새로 생성해서 저장함)
     Optional<Role> findByRoleName(RoleName roleName);
-
 
 }

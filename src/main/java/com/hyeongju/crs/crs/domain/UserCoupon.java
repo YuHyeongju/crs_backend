@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 public class UserCoupon {
+    // 유저가 포인트로 교환해 보유 중인 쿠폰 1건. Coupon(발행 정보)과 User(보유자)를 이어주는 엔티티
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +31,8 @@ public class UserCoupon {
     @JoinColumn(name = "COUPON_IDX", nullable = false)
     private Coupon coupon;
 
-    // 사용 여부
     @Column(name = "USED", nullable = false)
-    private boolean used = false;
+    private boolean used = false; // 쿠폰 사용 여부
 
     @CreationTimestamp
     @Column(name = "ISSUED_AT", nullable = false, updatable = false)

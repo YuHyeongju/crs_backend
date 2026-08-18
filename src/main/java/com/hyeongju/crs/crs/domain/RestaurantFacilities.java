@@ -38,7 +38,7 @@ public class RestaurantFacilities {
     @Column(name = "KIOSK", nullable = false)
     private boolean kiosk;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)              // 실질적으로 1:1처럼 사용되는 N:1 관계
     @JoinColumn(name = "REST_IDX",nullable = false)
     @JsonIgnore
     private Restaurant restaurant;

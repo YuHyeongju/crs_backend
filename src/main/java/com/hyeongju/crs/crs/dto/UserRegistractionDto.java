@@ -7,11 +7,12 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.aspectj.bridge.Message;
+import org.aspectj.bridge.Message; // 미사용 import
 
 @Getter
 @Setter
 public class UserRegistractionDto implements BaseRegistrationDto {
+    // 일반 유저 회원가입 요청 바디 DTO. Admin/Merchant DTO와 달리 추가 인증 필드가 없음
 
     @NotBlank(message = "아이디는 필수 입력 값입니다.")
     @Size(min = 4, max = 50,message = "아이디는 4자 이상 50자 이하로 입력해야 합니다.")

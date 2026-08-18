@@ -11,11 +11,11 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@Table(name = "bookmark", uniqueConstraints = { // 복합 유니크 제약 조건 추가
+@Table(name = "bookmark", uniqueConstraints = {
         @UniqueConstraint(
                 name = "UK_USER_RESTAURANT",
-                columnNames = {"USER_IDX","REST_IDX"} // 두 컬럼의 조합이 유일해야함.
-                // 한 유저가 한 식당에 여러 번 북마크를 할 수 없다.
+                columnNames = {"USER_IDX","REST_IDX"}
+                // 한 유저가 한 식당에 여러 번 북마크할 수 없도록 강제
         )
 })
 @NoArgsConstructor

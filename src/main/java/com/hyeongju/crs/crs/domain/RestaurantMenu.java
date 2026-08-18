@@ -29,6 +29,6 @@ public class RestaurantMenu {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REST_IDX")
-    @JsonIgnore
+    @JsonIgnore                          // Restaurant.menuList -> 각 메뉴 -> restaurant 순환참조 방지
     private Restaurant restaurant;
 }

@@ -14,18 +14,18 @@ import java.util.List;
 @Getter @Setter
 @NoArgsConstructor
 public class Role {
+    // 유저 권한(USER/MERCHANT/ADMIN)을 나타내는 엔티티. User.role이 이 테이블을 참조함
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="ROLE_IDX")
     private int roleIdx;
 
-    @Enumerated(EnumType.STRING) // 열거형을 DB에 어떤 형태로 저장할지 지정
+    @Enumerated(EnumType.STRING)
     @Column(name="ROLE_NAME", nullable = false,length = 100)
     private RoleName roleName;
 
     @OneToMany(mappedBy = "role",fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<User> users = new ArrayList<>();
-    // 하나의 역할은 여러 사람에게 주어진다.
+    private List<User> users = new ArrayList<>(); // 이 역할을 가진 유저 목록
 }

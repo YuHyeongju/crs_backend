@@ -31,7 +31,7 @@ public class Reward {
     @JsonIgnore
     private Restaurant restaurant;
 
-    // 적립 이벤트 1건당 지급된 포인트 (유저 잔액은 이 값들의 SUM으로 계산)
+    // 유저 잔액은 이 값들의 SUM으로 계산됨
     @Column(name = "TOTAL_REWARD_VALUE",nullable = false)
     private int totalRewardValue;
 

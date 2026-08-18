@@ -16,8 +16,8 @@ public enum CongestionStatus {
     private final int idx;
     private final String name;
 
-    // 숫자를 인자로 주면 해당하는 상수를 찾아줌
     public static CongestionStatus convertIdx(int idx){
+        // 프론트에서 넘어온 정수 코드를 CongestionStatus enum으로 변환 (해당하는 값이 없으면 NONE)
         for(CongestionStatus status : values()){
             if(status.getIdx() == idx){
                 return status;

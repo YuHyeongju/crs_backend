@@ -12,6 +12,7 @@ import java.util.List;
 @Setter
 
 public class RestaurantRequestDto {
+    // 가게 등록/수정 요청 DTO. 메뉴 목록과 편의시설 정보를 중첩 객체로 함께 받음
     private String kakaoId;
     private String restName;
     private String restTel;

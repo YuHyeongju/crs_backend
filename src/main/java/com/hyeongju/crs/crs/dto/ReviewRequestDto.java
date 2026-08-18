@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 
 public class ReviewRequestDto {
+    // 리뷰 등록/수정 요청 DTO
     private int restIdx;
 
     @NotBlank(message = "리뷰 내용은 필수 입력 값입니다.")

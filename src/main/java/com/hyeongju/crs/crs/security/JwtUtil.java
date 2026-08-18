@@ -12,6 +12,7 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
+    // JWT 액세스 토큰 발급/검증 유틸 (로그인 성공 시 AuthService/AuthController에서 호출)
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
@@ -23,6 +24,7 @@ public class JwtUtil {
     }
 
     public String generateAccessToken(int userIdx, String role) {
+        // 로그인 성공 시 발급하는 JWT 액세스 토큰 생성 (userIdx, role, 만료시각 포함)
         return Jwts.builder()
                 .subject(String.valueOf(userIdx))
                 .claim("role", role)
@@ -33,6 +35,7 @@ public class JwtUtil {
     }
 
     public boolean validateToken(String token) {
+        // 서명이 유효하고 만료되지 않았는지 확인 (파싱 예외가 나면 유효하지 않은 토큰으로 간주)
         try {
             Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token);
             return true;
@@ -42,12 +45,14 @@ public class JwtUtil {
     }
 
     public int getUserIdx(String token) {
+        // 토큰에서 유저 식별자(subject) 추출
         Claims claims = Jwts.parser().verifyWith(getKey()).build()
                 .parseSignedClaims(token).getPayload();
         return Integer.parseInt(claims.getSubject());
     }
 
     public String getRole(String token) {
+        // 토큰에서 권한(role) 추출
         Claims claims = Jwts.parser().verifyWith(getKey()).build()
                 .parseSignedClaims(token).getPayload();
         return (String) claims.get("role");

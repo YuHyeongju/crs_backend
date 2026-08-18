@@ -11,6 +11,7 @@ import lombok.Setter;
 @Getter
 
 public class AdminRegistractionDto implements BaseRegistrationDto{
+    // 관리자 회원가입 요청 바디 DTO
 
     @NotBlank(message = "아이디는 필수 입력 값입니다.")
     @Size(min = 4, max = 50,message = "아이디는 4자 이상 50자 이하로 입력해야 합니다.")

@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface RewardRepository extends JpaRepository<Reward, Integer> {
 
-    // 유저의 누적 포인트 합계 (적립 내역이 없으면 0 반환)
+    // 유저의 누적 포인트 합계 (적립 내역이 없어 SUM이 NULL이면 0으로 대체)
     @Query("SELECT COALESCE(SUM(r.totalRewardValue), 0) FROM Reward r WHERE r.user.userIdx = :userIdx")
     int sumRewardValueByUserIdx(@Param("userIdx") int userIdx);
 }

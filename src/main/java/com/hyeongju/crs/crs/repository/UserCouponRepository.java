@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface UserCouponRepository extends JpaRepository<UserCoupon, Integer> {
 
+    // 특정 유저(userIdx)가 보유한 쿠폰 목록을 발급받은 시각 최신순으로 조회
     List<UserCoupon> findByUserUserIdxOrderByIssuedAtDesc(int userIdx);
 }

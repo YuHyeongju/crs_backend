@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+// 혼잡도(붐빔 정도) 조회/제보 API
 @RestController
 @RequestMapping("/api/congestion")
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class CongestionController {
 
     private final CongestionService congestionService;
 
+    // 카카오맵 가게 ID 기준 현재 혼잡도 단건 조회
     @GetMapping("/{kakaoId}")
     public ResponseEntity<String> getCurrentCongestion(@PathVariable("kakaoId") String kakaoId){
         String currentStatus = congestionService.getCurrentcongestion(kakaoId);
@@ -32,11 +34,13 @@ public class CongestionController {
         return ResponseEntity.ok(currentStatus);
     }
 
+    // 내부 DB 가게 idx 기준 현재 혼잡도 단건 조회
     @GetMapping("/restIdx/{restIdx}")
     public ResponseEntity<String> getCurrentCongestionByRestIdx(@PathVariable("restIdx") int restIdx){
         return ResponseEntity.ok(congestionService.getCurrentCongestionByRestIdx(restIdx));
     }
 
+    // 지도에 표시된 여러 가게의 혼잡도를 한 번에 조회(카카오ID 목록 → 상태 맵)
     @PostMapping("/bulkStatus")
     public ResponseEntity<Map<String, String>> getCurrentCongstionAll(@RequestBody List<String> kakaoIds){
         System.out.println("==========================================================");
@@ -45,6 +49,7 @@ public class CongestionController {
         return ResponseEntity.ok(congestionService.getAllCurrentCongestion(kakaoIds));
     }
 
+    // 사용자 제보로 혼잡도 상태 갱신(가게가 DB에 없으면 서비스단에서 신규 등록)
     @PostMapping("/updateStatus")
     public ResponseEntity<Void> updateCongestion(@Valid @RequestBody CongestionUpdateDto dto,
                                                   jakarta.servlet.http.HttpServletRequest request){
@@ -64,6 +69,7 @@ public class CongestionController {
         return ResponseEntity.ok().build();
     }
 
+    // 로그인한 사용자가 직접 제보했던 혼잡도 히스토리 조회
     @GetMapping("/history")
     public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(jakarta.servlet.http.HttpServletRequest request){
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");

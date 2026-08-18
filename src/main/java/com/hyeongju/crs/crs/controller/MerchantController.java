@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+// 상인 마이페이지 API
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/merchants")
@@ -17,6 +18,7 @@ public class MerchantController {
 
     private final MerchantService merchantService;
 
+    // 상인 마이페이지 조회
     @GetMapping("/mypage")
     public ResponseEntity<?> getMerchantProfile(HttpServletRequest request) {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
@@ -30,6 +32,7 @@ public class MerchantController {
         }
     }
 
+    // 상인 마이페이지 정보 수정
     @PostMapping("/mypage/updateMerchant")
     public ResponseEntity<?> updateMerchantProfile(@Valid @RequestBody MerchantUpdateDto dto, HttpServletRequest request) {
         Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");

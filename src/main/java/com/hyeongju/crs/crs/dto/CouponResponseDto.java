@@ -12,12 +12,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CouponResponseDto {
+    // 쿠폰 목록 조회 응답 DTO
     private int couponIdx;
     private int restIdx;
     private String restName;
     private String title;
     private String description;
     private int pointCost;
-    private LocalDate validUntil;
+    private LocalDate validUntil; // null이면 무기한
     private boolean active;
 }

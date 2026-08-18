@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 @Service
 @RequiredArgsConstructor
 public class RewardService {
+    // 포인트 적립/차감을 "장부(원장)" 방식으로 관리하는 서비스
+    // 잔액이라는 별도 컬럼을 두지 않고, 적립/차감 내역을 각각 한 행씩 쌓은 뒤 합계를 잔액으로 계산함
 
     private final RewardRepository rewardRepository;
 
@@ -25,7 +27,7 @@ public class RewardService {
         Reward reward = new Reward();
         reward.setUser(user);
         reward.setRestaurant(restaurant);
-        reward.setTotalRewardValue(REPORT_REWARD_POINT);
+        reward.setTotalRewardValue(REPORT_REWARD_POINT); // 양수 값 = 적립
         reward.setRewardAt(LocalDateTime.now());
         reward.setRewardReason("혼잡도 제보 보상 - " + restaurant.getRestName());
         rewardRepository.save(reward);
@@ -37,7 +39,7 @@ public class RewardService {
         Reward reward = new Reward();
         reward.setUser(user);
         reward.setRestaurant(restaurant);
-        reward.setTotalRewardValue(-amount);
+        reward.setTotalRewardValue(-amount); // 음수 값 = 차감(쿠폰 교환 등)
         reward.setRewardAt(LocalDateTime.now());
         reward.setRewardReason(reason);
         rewardRepository.save(reward);
@@ -45,6 +47,6 @@ public class RewardService {
 
     // 유저 보유 포인트 잔액 = 적립 내역 합계
     public int getBalance(int userIdx) {
-        return rewardRepository.sumRewardValueByUserIdx(userIdx);
+        return rewardRepository.sumRewardValueByUserIdx(userIdx); // 양수/음수 내역을 모두 더한 순잔액
     }
 }

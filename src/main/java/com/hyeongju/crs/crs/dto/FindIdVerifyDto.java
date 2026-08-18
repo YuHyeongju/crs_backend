@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Getter @Setter
 public class FindIdVerifyDto {
+    // 아이디 찾기 2단계 요청 DTO: 인증코드 검증 후 마스킹된 아이디 반환
     @NotBlank(message = "이름은 필수 입력 값입니다.")
     private String name;
 

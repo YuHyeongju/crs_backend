@@ -26,7 +26,6 @@ public class ReviewReport {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "REPORTER_USER_IDX",nullable = false)
-    // 여기서는 컬럼의 DB상의 실제 이름 작성
     private User reporter;
 
     @ManyToOne(fetch = FetchType.LAZY)

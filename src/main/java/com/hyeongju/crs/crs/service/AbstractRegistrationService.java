@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 
 public abstract class AbstractRegistrationService {
+    // 일반유저/상인/관리자 3종의 회원가입 서비스가 공통으로 쓰는 로직을 모아둔 추상 클래스
+    // UserService, MerchantService, AdminService가 이 클래스를 상속받아 사용함
 
     protected final UserRepository userRepository;
     protected final RoleRepository roleRepository;
@@ -22,8 +24,8 @@ public abstract class AbstractRegistrationService {
 
     @Transactional
     protected User registerCommonFields(BaseRegistrationDto dto, RoleName roleName) {
+        // 회원 유형에 상관없이 공통되는 필드(아이디/비번/이름/이메일 등)로 User 엔티티를 만들어 반환
 
-        // 1. 공통 유효성 검증
         if (userRepository.existsById(dto.getId())) {
             throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
         }
@@ -31,19 +33,16 @@ public abstract class AbstractRegistrationService {
             throw new IllegalArgumentException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
-        // 2. 역할(Role) 조회
         Role defaultRole = roleRepository.findByRoleName(roleName)
                 .orElseGet(() -> {
                         Role newRole = new Role();
                         newRole.setRoleName(roleName);
                   return roleRepository.save(newRole);
-                }); // DB에 Role 테이블에 roleName이 없다면 생성해서 저장함.
+                }); // Role 테이블에 roleName이 없으면 생성해서 저장
 
-        // 3. 비밀번호 원문을 가져다가 암호화
         String encodedPassword = passwordEncoder.encode(dto.getPw());
 
         User newUser = new User();
-        // DTO의 공통 필드
         newUser.setId(dto.getId());
         newUser.setPw(encodedPassword);
         newUser.setEmail(dto.getEmail());
@@ -51,11 +50,10 @@ public abstract class AbstractRegistrationService {
         newUser.setPhNum(dto.getPhone());
         newUser.setGender(dto.getGender());
 
-        // 서버에서 생성한 데이터
         newUser.setCreateTime(LocalDateTime.now());
         newUser.setRole(defaultRole);
 
-        // 반환
+        // DB 저장은 각 하위 서비스가 유형별 필드까지 채운 뒤 직접 수행 (여기서는 save 호출 안 함)
         return newUser;
     }
 }

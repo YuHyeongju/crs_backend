@@ -13,6 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CouponRequestDto {
+    // 쿠폰 등록/수정 요청 DTO
     private int merchantUserIdx; // 등록 요청 상인 (가게 소유 검증용)
     private int restIdx;         // 쿠폰을 등록할 가게
 

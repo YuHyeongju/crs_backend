@@ -12,17 +12,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/rewards")
 @RequiredArgsConstructor
 public class RewardController {
+    // 유저 포인트 잔액 조회 API
 
     private final RewardService rewardService;
 
-    // 유저 보유 포인트 조회 (마이페이지 리워드 패널용)
     @GetMapping("/balance/{userIdx}")
     public ResponseEntity<RewardBalanceResponseDto> getBalance(@PathVariable("userIdx") int userIdx,
                                                                 HttpServletRequest request) {
+        // 로그인한 유저 본인의 포인트 잔액 조회 API
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        // 경로변수가 아닌 토큰의 authedUserIdx 기준으로 조회 — 남의 잔액 조회 방지
         int balance = rewardService.getBalance(authedUserIdx);
         return ResponseEntity.ok(new RewardBalanceResponseDto(balance));
     }

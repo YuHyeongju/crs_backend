@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MerchantService extends AbstractRegistrationService {
+    // 상인(가게 사장님) 회원가입/조회/수정 로직
 
     public MerchantService(
             UserRepository userRepository,
@@ -24,6 +25,7 @@ public class MerchantService extends AbstractRegistrationService {
 
     @Transactional
     public User registerMerchant(MerchantRegistractionDto dto){
+        // 상인 회원가입: 사업자번호 검증 → 공통 필드 생성 → 사업자번호 세팅 → 저장
 
         if(!isVaildBussinessNumber(dto.getBusinessNum())){
             throw new IllegalArgumentException("유효하지 않은 사업자 등록번호 입니다.");
@@ -37,12 +39,12 @@ public class MerchantService extends AbstractRegistrationService {
 
 
     }
-    // 사업자 등록번호 유효성 검사
     private boolean isVaildBussinessNumber(String businessNum){
-        return businessNum != null && businessNum.length() == 10;
+        return businessNum != null && businessNum.length() == 10; // 하이픈 포함 10자리("123-45-67890")인지만 간단히 체크
     }
 
     public MypageResponseDto getMerchantProfile(int userIdx){
+        // 마이페이지 조회: User 엔티티를 MypageResponseDto로 매핑
         User user = userRepository.findByUserIdx(userIdx).orElseThrow(
                 () -> new RuntimeException("해당 사용자를 찾을 수 없습니다."));
 
@@ -60,6 +62,7 @@ public class MerchantService extends AbstractRegistrationService {
 
     @Transactional
     public void updateMerchantProfile(int userIdx, MerchantUpdateDto dto){
+        // 마이페이지 수정: 비밀번호는 입력됐을 때만 재암호화 후 갱신
         User user = userRepository.findByUserIdx(userIdx).orElseThrow(()->
                 new IllegalStateException("존재하지 않는 사용자 입니다."));
 
@@ -70,5 +73,6 @@ public class MerchantService extends AbstractRegistrationService {
         user.setPhNum(dto.getPhNum());
         user.setEmail(dto.getEmail());
         user.setBusinessNum(dto.getBusinessNum());
+        // save() 호출 없이도 @Transactional 안에서 dirty checking으로 자동 UPDATE됨
     }
 }

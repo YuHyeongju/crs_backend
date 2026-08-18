@@ -10,5 +10,5 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RewardBalanceResponseDto {
-    private int balance; // 보유 포인트 총합
+    private int balance; // RewardRepository의 SUM 집계 결과
 }

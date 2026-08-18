@@ -34,7 +34,6 @@ public class Coupon {
     @Column(name = "DESCRIPTION", length = 500)
     private String description;
 
-    // 교환에 필요한 포인트
     @Column(name = "POINT_COST", nullable = false)
     private int pointCost;
 

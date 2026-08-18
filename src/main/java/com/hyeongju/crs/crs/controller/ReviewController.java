@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// 리뷰 API: 조회/등록/수정/삭제 + 리뷰 신고
 @RestController
 @RequestMapping("/api/reviews")
 @RequiredArgsConstructor
@@ -25,12 +26,14 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    // 특정 가게의 리뷰 목록 조회
     @GetMapping("/{restIdx}")
     public ResponseEntity<List<ReviewResponseDto>> getReviewByRestIdx(@PathVariable("restIdx") int restIdx){
         List<ReviewResponseDto> reviews = reviewService.getReviewsByRestaurant(restIdx);
         return ResponseEntity.ok(reviews);
     }
 
+    // 리뷰 등록(작성자는 요청 바디가 아니라 JWT 인증 정보로 지정)
     @PostMapping("/register")
     public ResponseEntity<String> registerReview(@Valid @RequestBody ReviewRequestDto requestDto, HttpServletRequest request){
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
@@ -43,6 +46,7 @@ public class ReviewController {
         return ResponseEntity.ok("리뷰가 등록되었습니다.");
     }
 
+    // 리뷰 신고(신고자도 JWT 인증 정보에서 추출)
     @PostMapping("/report")
     public ResponseEntity<String> reportReview(@RequestBody ReviewReportRequestDto requestDto, HttpServletRequest request){
         Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
@@ -62,6 +66,7 @@ public class ReviewController {
         }
     }
 
+    // 내가 쓴 리뷰 목록 페이지 단위 조회(기본 2개씩, 최신순)
     @GetMapping("/my/{userIdx}")
     public ResponseEntity<Page<MyReviewResponseDto>> getMyReviews(
             @PathVariable("userIdx") int userIdx,
@@ -74,6 +79,7 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.getMyReviews(authedUserIdx, pageable));
     }
 
+    // 내 리뷰 수정(작성자 본인 확인은 서비스단에서 처리)
     @PutMapping("/{reviewIdx}")
     public ResponseEntity<String> updateMyReview(@PathVariable("reviewIdx") int reviewIdx,
                                                  @Valid @RequestBody ReviewRequestDto requestDto,
@@ -95,6 +101,7 @@ public class ReviewController {
         }
     }
 
+    // 내 리뷰 삭제
     @DeleteMapping("/{reviewIdx}")
     public ResponseEntity<String> deleteMyReview(@PathVariable("reviewIdx") int reviewIdx,
                                                  @RequestParam("userIdx") int userIdx,

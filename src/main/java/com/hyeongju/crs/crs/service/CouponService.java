@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CouponService {
+    // 상인의 쿠폰 등록/관리 + 유저의 포인트 교환/사용을 모두 담당하는 서비스
 
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
@@ -77,6 +78,7 @@ public class CouponService {
         coupon.setDescription(dto.getDescription());
         coupon.setPointCost(dto.getPointCost());
         coupon.setValidUntil(dto.getValidUntil());
+        // dirty checking으로 자동 UPDATE
     }
 
     // 쿠폰 비활성화 (소유 검증)
@@ -88,7 +90,7 @@ public class CouponService {
         if (restaurant.getUser() == null || restaurant.getUser().getUserIdx() != merchantUserIdx) {
             throw new SecurityException("본인 쿠폰만 삭제할 수 있습니다.");
         }
-        coupon.setActive(false);
+        coupon.setActive(false); // 실제 DB 행을 지우지 않고 노출만 끄는 소프트 삭제
     }
 
     // ===================== 유저 =====================
@@ -114,6 +116,7 @@ public class CouponService {
     public void redeemCoupon(int couponIdx, int userIdx) {
         User user = userRepository.findById(userIdx)
                 .orElseThrow(() -> new IllegalStateException("유저를 찾을 수 없습니다."));
+        // userIdx가 int이므로 UserRepository의 findById(String)이 아니라 JpaRepository의 findById(Integer)가 호출됨
         Coupon coupon = couponRepository.findById(couponIdx)
                 .orElseThrow(() -> new IllegalStateException("쿠폰을 찾을 수 없습니다."));
 
@@ -167,6 +170,7 @@ public class CouponService {
     // ===================== 매퍼 =====================
 
     private CouponResponseDto toResponseDto(Coupon c) {
+        // Coupon 엔티티 -> 응답 DTO 매핑
         return new CouponResponseDto(
                 c.getCouponIdx(),
                 c.getRestaurant().getRestIdx(),
@@ -179,6 +183,7 @@ public class CouponService {
     }
 
     private MyCouponResponseDto toMyCouponDto(UserCoupon uc) {
+        // 보유 쿠폰(UserCoupon) -> 응답 DTO 매핑
         Coupon c = uc.getCoupon();
         return new MyCouponResponseDto(
                 uc.getUserCouponIdx(),

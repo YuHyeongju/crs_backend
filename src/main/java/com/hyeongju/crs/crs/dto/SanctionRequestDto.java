@@ -10,5 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SanctionRequestDto {
+    // 관리자가 유저를 제재(정지/탈퇴 등)할 때 사유를 전달하는 요청 DTO
     private String reason;
 }

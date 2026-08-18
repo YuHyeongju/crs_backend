@@ -12,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 
 public class UserUpdateDto {
+    // 마이페이지 공통 수정 필드(비밀번호/이메일/전화번호). AdminUpdateDto, MerchantUpdateDto가 상속해서 확장
 
     @Pattern(
             regexp = "^$|(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",

@@ -24,7 +24,7 @@ public class Congestion {
     @Column(name = "CONG_IDX")
     private int congIdx;
 
-    @Enumerated(EnumType.STRING) // DB에 혼잡도 상태를 문자열로 저장
+    @Enumerated(EnumType.STRING)
     @Column(name = "CONG_Status")
     private CongestionStatus congStatus;
 
@@ -33,13 +33,13 @@ public class Congestion {
     private LocalDateTime congAt;
 
     @Column(name = "CONG_SHOW",nullable = false)
-    private boolean congShow;
+    private boolean congShow;                         // 화면 노출 여부(false면 숨김 처리)
 
     @Column(name = "CONG_UPDATE_AT")
     private LocalDateTime congUpdateAt;
 
     @Column(name = "CONG_HIDDEN_AT")
-    private LocalDateTime congHiddenAt;
+    private LocalDateTime congHiddenAt;                // 숨김 처리된 시각
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_IDX",nullable = false)

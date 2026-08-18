@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MyCouponResponseDto {
+    // 마이페이지 "내가 보유한 쿠폰 목록" 응답 DTO
     private int userCouponIdx;
     private String title;
     private String restName;
@@ -20,5 +21,5 @@ public class MyCouponResponseDto {
     private LocalDate validUntil;
     private boolean used;
     private LocalDateTime issuedAt;
-    private LocalDateTime usedAt;
+    private LocalDateTime usedAt;   // 미사용이면 null
 }

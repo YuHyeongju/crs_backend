@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// 쿠폰 API: 상인의 등록/수정/비활성화 + 유저의 조회/교환/사용
 @RestController
 @RequestMapping("/api/coupons")
 @RequiredArgsConstructor

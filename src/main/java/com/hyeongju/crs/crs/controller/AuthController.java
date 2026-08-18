@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+// 인증 관련 API: 회원가입(일반/상인/관리자), 로그인, 토큰 재발급, 로그아웃, 회원 탈퇴
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
@@ -32,6 +33,7 @@ public class AuthController {
     @Value("${app.cookie.secure}")
     private boolean cookieSecure;
 
+    // 일반 사용자 회원가입: 아이디/휴대폰 중복, 비밀번호 확인 일치 여부를 먼저 검사
     @PostMapping("/register/user")
     public ResponseEntity<String> registerUser(@Valid @RequestBody UserRegistractionDto dto) {
         if (authService.existsById(dto.getId()))
@@ -44,6 +46,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("회원가입 성공");
     }
 
+    // 상인 회원가입: 일반 가입 검사에 더해 사업자 등록번호 중복 여부까지 확인
     @PostMapping("/register/merchant")
     public ResponseEntity<String> registerMerchant(@Valid @RequestBody MerchantRegistractionDto dto) {
         if (authService.existsById(dto.getId()))
@@ -58,6 +61,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("상인 회원가입 성공");
     }
 
+    // 관리자 회원가입: 일반 가입 검사에 더해 관리자 코드 중복 여부까지 확인
     @PostMapping("/register/admin")
     public ResponseEntity<String> registerAdmin(@Valid @RequestBody AdminRegistractionDto dto) {
         if (authService.existsById(dto.getId()))
@@ -72,6 +76,7 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.CREATED).body("관리자 회원가입 성공");
     }
 
+    // 로그인: 인증 성공 시 Access Token은 응답 바디로, Refresh Token은 HttpOnly 쿠키로 내려줌
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto dto, HttpServletResponse response) {
         try {
@@ -120,6 +125,7 @@ public class AuthController {
         }
     }
 
+    // 로그아웃: 서버에 저장된 리프레시 토큰 삭제 + 클라이언트 쿠키도 즉시 만료시켜 제거
     @PostMapping("/logout")
     public ResponseEntity<String> logout(
             @CookieValue(value = "refreshToken", required = false) String refreshToken,
@@ -133,6 +139,7 @@ public class AuthController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
+    // 회원 탈퇴: URL/바디의 값이 아니라 JWT로 인증된 사용자 idx를 기준으로만 처리(IDOR 방지)
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(
             HttpServletRequest request,

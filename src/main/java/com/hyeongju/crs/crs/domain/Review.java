@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+// 리뷰 엔티티. 삭제/차단 시에도 물리적으로 지우지 않고 status를 바꾸는 소프트 삭제 방식 사용
 @Entity
 @Getter
 @Setter
