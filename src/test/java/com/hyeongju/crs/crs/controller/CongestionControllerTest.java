@@ -18,6 +18,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -94,7 +96,7 @@ class CongestionControllerTest {
         dto.setCongStatus("BUSY");
 
         mockMvc.perform(post("/api/congestion/updateStatus")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk());
@@ -128,7 +130,7 @@ class CongestionControllerTest {
         dto.setCongStatus("");
 
         mockMvc.perform(post("/api/congestion/updateStatus")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -143,7 +145,7 @@ class CongestionControllerTest {
                 new MyCongestionResponseDto(55, "맛있는집", "혼잡", LocalDateTime.now());
         given(congestionService.getMyCongestionHistory(1)).willReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/congestion/history").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/congestion/history").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].restName").value("맛있는집"))
                 .andExpect(jsonPath("$[0].status").value("혼잡"));

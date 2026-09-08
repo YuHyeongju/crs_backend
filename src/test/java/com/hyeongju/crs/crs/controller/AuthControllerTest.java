@@ -25,6 +25,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -401,7 +403,7 @@ class AuthControllerTest {
     @DisplayName("POST /api/auth/withdraw - 성공 시 200 및 쿠키 만료")
     void withdraw_success() throws Exception {
         mockMvc.perform(post("/api/auth/withdraw")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .cookie(new Cookie("refreshToken", "refresh-token")))
                 .andExpect(status().isOk())
                 .andExpect(content().string("회원 탈퇴가 완료 되었습니다."))

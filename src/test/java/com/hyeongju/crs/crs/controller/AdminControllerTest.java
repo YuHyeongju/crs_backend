@@ -23,6 +23,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,7 +67,7 @@ class AdminControllerTest {
                 "adminuser", "관리자", "admin@example.com", "010-1111-2222", "F", "ADMIN", null, "ABC1234");
         given(adminService.getAdminProfile(1)).willReturn(dto);
 
-        mockMvc.perform(get("/api/admins/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/admins/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("adminuser"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
@@ -85,7 +87,7 @@ class AdminControllerTest {
     void getAdminProfile_notFound() throws Exception {
         given(adminService.getAdminProfile(1)).willThrow(new RuntimeException("해당 사용자를 찾을 수 없습니다."));
 
-        mockMvc.perform(get("/api/admins/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/admins/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound());
     }
 
@@ -98,7 +100,7 @@ class AdminControllerTest {
         dto.setAdminNum("ZZZ9999");
 
         mockMvc.perform(post("/api/admins/mypage/updateAdmin")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -128,7 +130,7 @@ class AdminControllerTest {
         dto.setAdminNum("");
 
         mockMvc.perform(post("/api/admins/mypage/updateAdmin")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());

@@ -7,7 +7,6 @@ import com.hyeongju.crs.crs.dto.UserRegistractionDto;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.security.JwtUtil;
 import com.hyeongju.crs.crs.service.AuthService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -142,11 +142,11 @@ public class AuthController {
     // 회원 탈퇴: URL/바디의 값이 아니라 JWT로 인증된 사용자 idx를 기준으로만 처리(IDOR 방지)
     @PostMapping("/withdraw")
     public ResponseEntity<String> withdraw(
-            HttpServletRequest request,
+            Authentication authentication,
             @CookieValue(value = "refreshToken", required = false) String refreshToken,
             HttpServletResponse response) {
         try {
-            Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+            Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
             if (authedUserIdx == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
             }

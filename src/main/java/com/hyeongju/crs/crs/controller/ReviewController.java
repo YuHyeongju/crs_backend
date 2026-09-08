@@ -5,7 +5,6 @@ import com.hyeongju.crs.crs.dto.ReviewReportRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewRequestDto;
 import com.hyeongju.crs.crs.dto.ReviewResponseDto;
 import com.hyeongju.crs.crs.service.ReviewService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,8 +35,8 @@ public class ReviewController {
 
     // 리뷰 등록(작성자는 요청 바디가 아니라 JWT 인증 정보로 지정)
     @PostMapping("/register")
-    public ResponseEntity<String> registerReview(@Valid @RequestBody ReviewRequestDto requestDto, HttpServletRequest request){
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<String> registerReview(@Valid @RequestBody ReviewRequestDto requestDto, Authentication authentication){
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -48,8 +48,8 @@ public class ReviewController {
 
     // 리뷰 신고(신고자도 JWT 인증 정보에서 추출)
     @PostMapping("/report")
-    public ResponseEntity<String> reportReview(@RequestBody ReviewReportRequestDto requestDto, HttpServletRequest request){
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<String> reportReview(@RequestBody ReviewReportRequestDto requestDto, Authentication authentication){
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -71,8 +71,8 @@ public class ReviewController {
     public ResponseEntity<Page<MyReviewResponseDto>> getMyReviews(
             @PathVariable("userIdx") int userIdx,
             @PageableDefault(size = 2, sort = "reviewAt", direction = Sort.Direction.DESC) Pageable pageable,
-            HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+            Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -83,8 +83,8 @@ public class ReviewController {
     @PutMapping("/{reviewIdx}")
     public ResponseEntity<String> updateMyReview(@PathVariable("reviewIdx") int reviewIdx,
                                                  @Valid @RequestBody ReviewRequestDto requestDto,
-                                                 HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                 Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -105,8 +105,8 @@ public class ReviewController {
     @DeleteMapping("/{reviewIdx}")
     public ResponseEntity<String> deleteMyReview(@PathVariable("reviewIdx") int reviewIdx,
                                                  @RequestParam("userIdx") int userIdx,
-                                                 HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                 Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }

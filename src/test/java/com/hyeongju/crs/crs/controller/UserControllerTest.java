@@ -22,6 +22,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -60,7 +62,7 @@ class UserControllerTest {
                 "testuser", "홍길동", "test@example.com", "010-1234-5678", "M", "USER", null, null);
         given(userService.getUserProfile(1)).willReturn(dto);
 
-        mockMvc.perform(get("/api/users/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/users/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("testuser"))
                 .andExpect(jsonPath("$.name").value("홍길동"))
@@ -81,7 +83,7 @@ class UserControllerTest {
     void getUserProfile_notFound() throws Exception {
         given(userService.getUserProfile(1)).willThrow(new RuntimeException("해당 사용자를 찾을 수 없습니다."));
 
-        mockMvc.perform(get("/api/users/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/users/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("해당 사용자를 찾을 수 없습니다."));
     }
@@ -95,7 +97,7 @@ class UserControllerTest {
         dto.setPhNum("010-5555-6666");
 
         mockMvc.perform(post("/api/users/mypage/updateUser")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -123,7 +125,7 @@ class UserControllerTest {
         dto.setPhNum("010-5555-6666");
 
         mockMvc.perform(post("/api/users/mypage/updateUser")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -137,7 +139,7 @@ class UserControllerTest {
         dto.setPhNum("01012345678");
 
         mockMvc.perform(post("/api/users/mypage/updateUser")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());

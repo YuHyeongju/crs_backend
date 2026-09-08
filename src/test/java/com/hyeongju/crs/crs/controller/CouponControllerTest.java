@@ -20,6 +20,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -72,7 +74,7 @@ class CouponControllerTest {
         given(couponService.createCoupon(any(CouponRequestDto.class))).willReturn(new Coupon());
 
         mockMvc.perform(post("/api/coupons/register")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isOk())
@@ -98,7 +100,7 @@ class CouponControllerTest {
                 .willThrow(new SecurityException("본인 소유의 가게에만 쿠폰을 등록할 수 있습니다."));
 
         mockMvc.perform(post("/api/coupons/register")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isForbidden())
@@ -112,7 +114,7 @@ class CouponControllerTest {
                 .willThrow(new IllegalArgumentException("필요 포인트는 1 이상이어야 합니다."));
 
         mockMvc.perform(post("/api/coupons/register")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isBadRequest());
@@ -125,7 +127,7 @@ class CouponControllerTest {
                 .willThrow(new IllegalStateException("가게를 찾을 수 없습니다."));
 
         mockMvc.perform(post("/api/coupons/register")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isNotFound());
@@ -138,7 +140,7 @@ class CouponControllerTest {
         dto.setTitle("");
 
         mockMvc.perform(post("/api/coupons/register")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -155,7 +157,7 @@ class CouponControllerTest {
                 100, 10, "맛있는집", "아메리카노 무료", "설명", 300, LocalDate.now().plusDays(30), true);
         given(couponService.getMyStoreCoupons(1)).willReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/coupons/my-store/1").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/coupons/my-store/1").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].couponIdx").value(100))
                 .andExpect(jsonPath("$[0].restName").value("맛있는집"))
@@ -201,7 +203,7 @@ class CouponControllerTest {
     void update_success() throws Exception {
         mockMvc.perform(post("/api/coupons/update/100")
                         .param("merchantUserIdx", "1")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isOk())
@@ -228,7 +230,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/update/100")
                         .param("merchantUserIdx", "1")
-                        .requestAttr("authenticatedUserIdx", 999)
+                        .with(authentication(new TestingAuthenticationToken(999, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isForbidden());
@@ -242,7 +244,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/update/999")
                         .param("merchantUserIdx", "1")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isNotFound());
@@ -253,7 +255,7 @@ class CouponControllerTest {
     void delete_success() throws Exception {
         mockMvc.perform(post("/api/coupons/delete/100")
                         .param("merchantUserIdx", "1")
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("쿠폰이 삭제되었습니다."));
 
@@ -268,7 +270,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/delete/100")
                         .param("merchantUserIdx", "1")
-                        .requestAttr("authenticatedUserIdx", 999))
+                        .with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -286,7 +288,7 @@ class CouponControllerTest {
     void redeem_success() throws Exception {
         mockMvc.perform(post("/api/coupons/100/redeem")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("쿠폰을 교환했습니다."));
 
@@ -301,7 +303,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/100/redeem")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("포인트가 부족합니다. (보유 100P / 필요 300P)"));
     }
@@ -314,7 +316,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/100/redeem")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isNotFound());
     }
 
@@ -335,7 +337,7 @@ class CouponControllerTest {
                 false, LocalDateTime.now(), null);
         given(couponService.getMyCoupons(2)).willReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/coupons/my/2").requestAttr("authenticatedUserIdx", 2))
+        mockMvc.perform(get("/api/coupons/my/2").with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userCouponIdx").value(7))
                 .andExpect(jsonPath("$[0].used").value(false));
@@ -353,7 +355,7 @@ class CouponControllerTest {
     void use_success() throws Exception {
         mockMvc.perform(post("/api/coupons/use/7")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("쿠폰을 사용했습니다."));
 
@@ -368,7 +370,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/use/7")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 999))
+                        .with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -380,7 +382,7 @@ class CouponControllerTest {
 
         mockMvc.perform(post("/api/coupons/use/7")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isConflict())
                 .andExpect(content().string("이미 사용한 쿠폰입니다."));
     }

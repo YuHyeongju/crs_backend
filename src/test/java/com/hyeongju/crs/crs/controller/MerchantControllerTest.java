@@ -18,6 +18,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -52,7 +54,7 @@ class MerchantControllerTest {
                 "merchant1", "사장님", "m@example.com", "010-2222-3333", "M", "MERCHANT", "1234567890", null);
         given(merchantService.getMerchantProfile(1)).willReturn(dto);
 
-        mockMvc.perform(get("/api/merchants/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/merchants/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value("merchant1"))
                 .andExpect(jsonPath("$.role").value("MERCHANT"))
@@ -75,7 +77,7 @@ class MerchantControllerTest {
         given(merchantService.getMerchantProfile(1))
                 .willThrow(new RuntimeException("해당 사용자를 찾을 수 없습니다."));
 
-        mockMvc.perform(get("/api/merchants/mypage").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/merchants/mypage").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string("해당 사용자를 찾을 수 없습니다."));
     }
@@ -89,7 +91,7 @@ class MerchantControllerTest {
         dto.setBusinessNum("9876543210");
 
         mockMvc.perform(post("/api/merchants/mypage/updateMerchant")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -120,7 +122,7 @@ class MerchantControllerTest {
         dto.setBusinessNum("");
 
         mockMvc.perform(post("/api/merchants/mypage/updateMerchant")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -135,7 +137,7 @@ class MerchantControllerTest {
         dto.setBusinessNum("9876543210");
 
         mockMvc.perform(post("/api/merchants/mypage/updateMerchant")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());

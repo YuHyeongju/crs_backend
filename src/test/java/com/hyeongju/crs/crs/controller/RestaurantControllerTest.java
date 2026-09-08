@@ -22,6 +22,8 @@ import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -110,7 +112,7 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/register")
                         .file(dtoPart())
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.restIdx").value(10));
     }
@@ -132,7 +134,7 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/register")
                         .file(dtoPart())
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isConflict())
                 .andExpect(content().string("이미 다른 사업자가 등록한 가게입니다."));
     }
@@ -151,7 +153,7 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/register")
                         .file(part)
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -163,7 +165,7 @@ class RestaurantControllerTest {
         RestaurantResponseDto dto = new RestaurantResponseDto(10, "맛있는집", "서울시 강남구", 4.3, 3, 1);
         given(restaurantService.getMyRestaurants(1)).willReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/restaurants/my-restaurant-list").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/restaurants/my-restaurant-list").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].restIdx").value(10))
                 .andExpect(jsonPath("$[0].averageRating").value(4.3));
@@ -263,7 +265,7 @@ class RestaurantControllerTest {
     void getRestaurantForEdit_success() throws Exception {
         given(restaurantService.getRestaurantForEdit(10, 1)).willReturn(requestDto());
 
-        mockMvc.perform(get("/api/restaurants/edit/10").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/restaurants/edit/10").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.restName").value("맛있는집"))
                 .andExpect(jsonPath("$.restBusiHours").value("10:00 - 22:00"));
@@ -282,7 +284,7 @@ class RestaurantControllerTest {
         given(restaurantService.getRestaurantForEdit(anyInt(), anyInt()))
                 .willThrow(new SecurityException("본인이 등록한 가게만 조회할 수 있습니다."));
 
-        mockMvc.perform(get("/api/restaurants/edit/10").requestAttr("authenticatedUserIdx", 999))
+        mockMvc.perform(get("/api/restaurants/edit/10").with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string("본인이 등록한 가게만 조회할 수 있습니다."));
     }
@@ -293,7 +295,7 @@ class RestaurantControllerTest {
         given(restaurantService.getRestaurantForEdit(anyInt(), anyInt()))
                 .willThrow(new IllegalStateException("해당 식당 정보를 찾을 수 없음: 999"));
 
-        mockMvc.perform(get("/api/restaurants/edit/999").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/restaurants/edit/999").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound());
     }
 
@@ -305,7 +307,7 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/update/10")
                         .file(dtoPart())
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("가게 정보가 업데이트 되었습니다."));
     }
@@ -326,7 +328,7 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/update/10")
                         .file(dtoPart())
-                        .requestAttr("authenticatedUserIdx", 999))
+                        .with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -339,14 +341,14 @@ class RestaurantControllerTest {
 
         mockMvc.perform(multipart("/api/restaurants/update/999")
                         .file(dtoPart())
-                        .requestAttr("authenticatedUserIdx", 1))
+                        .with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("POST /api/restaurants/delete/{restIdx} - 삭제 성공 시 200")
     void deleteRestaurant_success() throws Exception {
-        mockMvc.perform(post("/api/restaurants/delete/10").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(post("/api/restaurants/delete/10").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("식당 정보와 메뉴 사진이 모두 삭제 됨"));
 
@@ -368,7 +370,7 @@ class RestaurantControllerTest {
         willThrow(new SecurityException("본인이 등록한 가게만 삭제할 수 있습니다."))
                 .given(restaurantService).deleteRestaurant(anyInt(), anyInt());
 
-        mockMvc.perform(post("/api/restaurants/delete/10").requestAttr("authenticatedUserIdx", 999))
+        mockMvc.perform(post("/api/restaurants/delete/10").with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -378,7 +380,7 @@ class RestaurantControllerTest {
         willThrow(new IllegalStateException("삭제할 식당을 찾을 수 없습니다."))
                 .given(restaurantService).deleteRestaurant(anyInt(), anyInt());
 
-        mockMvc.perform(post("/api/restaurants/delete/999").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(post("/api/restaurants/delete/999").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isNotFound());
     }
 }

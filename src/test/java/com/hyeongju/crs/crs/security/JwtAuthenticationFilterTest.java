@@ -33,7 +33,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    @DisplayName("유효한 Bearer 토큰이면 request 속성과 SecurityContext 에 인증 정보를 심는다")
+    @DisplayName("유효한 Bearer 토큰이면 SecurityContext 에 인증 정보를 심는다")
     void validToken_setsAuthentication() throws Exception {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Bearer valid-token");
@@ -45,8 +45,6 @@ class JwtAuthenticationFilterTest {
         given(jwtUtil.getRole("valid-token")).willReturn("ADMIN");
 
         filter.doFilter(request, response, chain);
-
-        assertThat(request.getAttribute("authenticatedUserIdx")).isEqualTo(7);
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         assertThat(auth).isNotNull();
@@ -68,7 +66,6 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        assertThat(request.getAttribute("authenticatedUserIdx")).isNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         assertThat(chain.getRequest()).isSameAs(request);
         verify(jwtUtil, never()).getUserIdx("bad-token");
@@ -83,7 +80,6 @@ class JwtAuthenticationFilterTest {
 
         filter.doFilter(request, response, chain);
 
-        assertThat(request.getAttribute("authenticatedUserIdx")).isNull();
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         verify(jwtUtil, never()).validateToken(org.mockito.ArgumentMatchers.anyString());
     }

@@ -26,6 +26,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -111,7 +113,7 @@ class ReviewControllerTest {
     @DisplayName("POST /api/reviews/register - 등록 성공 시 200, 작성자는 토큰의 userIdx")
     void registerReview_success() throws Exception {
         mockMvc.perform(post("/api/reviews/register")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isOk())
@@ -142,7 +144,7 @@ class ReviewControllerTest {
         dto.setContent("");
 
         mockMvc.perform(post("/api/reviews/register")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -155,7 +157,7 @@ class ReviewControllerTest {
         dto.setRating(6);
 
         mockMvc.perform(post("/api/reviews/register")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest());
@@ -176,7 +178,7 @@ class ReviewControllerTest {
     @DisplayName("POST /api/reviews/report - 신고 성공 시 200")
     void reportReview_success() throws Exception {
         mockMvc.perform(post("/api/reviews/report")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reportDto())))
                 .andExpect(status().isOk())
@@ -199,7 +201,7 @@ class ReviewControllerTest {
                 .given(reviewService).reportReview(any(ReviewReportRequestDto.class));
 
         mockMvc.perform(post("/api/reviews/report")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reportDto())))
                 .andExpect(status().isForbidden());
@@ -212,7 +214,7 @@ class ReviewControllerTest {
                 .given(reviewService).reportReview(any(ReviewReportRequestDto.class));
 
         mockMvc.perform(post("/api/reviews/report")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reportDto())))
                 .andExpect(status().isBadRequest());
@@ -225,7 +227,7 @@ class ReviewControllerTest {
                 .given(reviewService).reportReview(any(ReviewReportRequestDto.class));
 
         mockMvc.perform(post("/api/reviews/report")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reportDto())))
                 .andExpect(status().isNotFound());
@@ -240,7 +242,7 @@ class ReviewControllerTest {
         given(reviewService.getMyReviews(eq(2), any(Pageable.class)))
                 .willReturn(new PageImpl<>(List.of(new MyReviewResponseDto(sampleReview())), pageable, 1));
 
-        mockMvc.perform(get("/api/reviews/my/2").requestAttr("authenticatedUserIdx", 2))
+        mockMvc.perform(get("/api/reviews/my/2").with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].reviewIdx").value(100))
                 .andExpect(jsonPath("$.content[0].restName").value("맛있는집"))
@@ -260,7 +262,7 @@ class ReviewControllerTest {
     @DisplayName("PUT /api/reviews/{reviewIdx} - 수정 성공 시 200")
     void updateMyReview_success() throws Exception {
         mockMvc.perform(put("/api/reviews/100")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isOk())
@@ -285,7 +287,7 @@ class ReviewControllerTest {
                 .given(reviewService).updateMyReview(anyInt(), any(ReviewRequestDto.class));
 
         mockMvc.perform(put("/api/reviews/100")
-                        .requestAttr("authenticatedUserIdx", 999)
+                        .with(authentication(new TestingAuthenticationToken(999, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isForbidden());
@@ -298,7 +300,7 @@ class ReviewControllerTest {
                 .given(reviewService).updateMyReview(anyInt(), any(ReviewRequestDto.class));
 
         mockMvc.perform(put("/api/reviews/999")
-                        .requestAttr("authenticatedUserIdx", 2)
+                        .with(authentication(new TestingAuthenticationToken(2, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto())))
                 .andExpect(status().isNotFound());
@@ -309,7 +311,7 @@ class ReviewControllerTest {
     void deleteMyReview_success() throws Exception {
         mockMvc.perform(delete("/api/reviews/100")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isOk())
                 .andExpect(content().string("리뷰가 삭제되었습니다."));
 
@@ -333,7 +335,7 @@ class ReviewControllerTest {
 
         mockMvc.perform(delete("/api/reviews/100")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 999))
+                        .with(authentication(new TestingAuthenticationToken(999, null))))
                 .andExpect(status().isForbidden());
     }
 
@@ -345,7 +347,7 @@ class ReviewControllerTest {
 
         mockMvc.perform(delete("/api/reviews/100")
                         .param("userIdx", "2")
-                        .requestAttr("authenticatedUserIdx", 2))
+                        .with(authentication(new TestingAuthenticationToken(2, null))))
                 .andExpect(status().isNotFound());
     }
 }

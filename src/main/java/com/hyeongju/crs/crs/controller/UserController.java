@@ -2,11 +2,11 @@ package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.dto.*;
 import com.hyeongju.crs.crs.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 // 일반 유저 마이페이지 + 아이디 찾기/비밀번호 재설정 API
@@ -19,8 +19,8 @@ public class UserController {
 
     // 유저 마이페이지 조회
     @GetMapping("/mypage")
-    public ResponseEntity<?> getUserProfile(HttpServletRequest request) {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<?> getUserProfile(Authentication authentication) {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
@@ -33,8 +33,8 @@ public class UserController {
 
     // 유저 마이페이지 정보 수정
     @PostMapping("/mypage/updateUser")
-    public ResponseEntity<?> updateUserProfile(@Valid @RequestBody UserUpdateDto dto, HttpServletRequest request) {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<?> updateUserProfile(@Valid @RequestBody UserUpdateDto dto, Authentication authentication) {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         userService.updateUserProfile(userIdx, dto);

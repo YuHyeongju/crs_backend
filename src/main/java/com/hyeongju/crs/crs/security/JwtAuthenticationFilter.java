@@ -33,8 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 int userIdx = jwtUtil.getUserIdx(token);
                 String role = jwtUtil.getRole(token);
 
-                request.setAttribute("authenticatedUserIdx", userIdx);
-
+                // 인증된 사용자 식별값은 SecurityContext 한 곳에만 둠(principal = userIdx).
+                // 컨트롤러는 Authentication 파라미터로 이걸 받아 사용 - request attribute와 이중 관리하지 않음
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userIdx, null, List.of(new SimpleGrantedAuthority("ROLE_" + role))
                 );

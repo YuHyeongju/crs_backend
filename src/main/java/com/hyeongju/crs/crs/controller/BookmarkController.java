@@ -4,9 +4,9 @@ import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.BookMarkDto;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import com.hyeongju.crs.crs.service.BookmarkService;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +22,9 @@ public class BookmarkController {
     private final BookmarkService bookMarkService;
 
     @PostMapping("/toggle")
-    public ResponseEntity<String> toggleBookMark(@RequestBody BookMarkDto dto, jakarta.servlet.http.HttpServletRequest request){
+    public ResponseEntity<String> toggleBookMark(@RequestBody BookMarkDto dto, Authentication authentication){
         // 북마크 토글 API — 이미 등록돼 있으면 해제, 아니면 등록
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
@@ -45,9 +45,9 @@ public class BookmarkController {
 
     @GetMapping("/my-bookmark-list/{userIdx}")
     public ResponseEntity<List<String>> getUserBookMarkIds(@PathVariable("userIdx") int userIdx,
-                                                            jakarta.servlet.http.HttpServletRequest request) {
+                                                            Authentication authentication) {
         // 로그인한 유저의 북마크 kakaoId 목록 조회 API (지도에서 북마크 표시용)
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(401).build();
         }
@@ -66,9 +66,9 @@ public class BookmarkController {
         return ResponseEntity.ok(bookmarkIds);
     }
     @GetMapping("/details")
-    public ResponseEntity<List<BookMarkDto>> getMyBookmarkDetails(jakarta.servlet.http.HttpServletRequest request){
+    public ResponseEntity<List<BookMarkDto>> getMyBookmarkDetails(Authentication authentication){
         // 마이페이지 "내 북마크 목록"용 상세 정보 조회 API
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
 
         if(userIdx == null){
             return ResponseEntity.status(401).build();

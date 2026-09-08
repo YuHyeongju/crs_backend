@@ -19,6 +19,8 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +72,7 @@ class BookmarkControllerTest {
         dto.setRestIdx(10);
 
         mockMvc.perform(post("/api/bookmarks/toggle")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -87,7 +89,7 @@ class BookmarkControllerTest {
         dto.setKakaoId("kakao-1");
 
         mockMvc.perform(post("/api/bookmarks/toggle")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
@@ -118,7 +120,7 @@ class BookmarkControllerTest {
         dto.setRestIdx(10);
 
         mockMvc.perform(post("/api/bookmarks/toggle")
-                        .requestAttr("authenticatedUserIdx", 1)
+                        .with(authentication(new TestingAuthenticationToken(1, null)))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isBadRequest())
@@ -130,7 +132,7 @@ class BookmarkControllerTest {
     void getUserBookMarkIds_success() throws Exception {
         given(bookMarkService.getBookmarkKakaoIds(1)).willReturn(List.of("kakao-1", "db-77"));
 
-        mockMvc.perform(get("/api/bookmarks/my-bookmark-list/1").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/bookmarks/my-bookmark-list/1").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value("kakao-1"))
                 .andExpect(jsonPath("$[1]").value("db-77"));
@@ -150,7 +152,7 @@ class BookmarkControllerTest {
     void getUserBookMarkIds_usesAuthenticatedUserIdx() throws Exception {
         given(bookMarkService.getBookmarkKakaoIds(1)).willReturn(List.of("kakao-1"));
 
-        mockMvc.perform(get("/api/bookmarks/my-bookmark-list/999").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/bookmarks/my-bookmark-list/999").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk());
 
         verify(bookMarkService).getBookmarkKakaoIds(1);
@@ -170,7 +172,7 @@ class BookmarkControllerTest {
 
         given(bookMarkService.getBookmarkListForMypage(1)).willReturn(List.of(dto));
 
-        mockMvc.perform(get("/api/bookmarks/details").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/bookmarks/details").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].restIdx").value(10))
                 .andExpect(jsonPath("$[0].restName").value("맛있는집"))

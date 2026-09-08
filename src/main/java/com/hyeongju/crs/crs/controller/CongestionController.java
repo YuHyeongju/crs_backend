@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +53,8 @@ public class CongestionController {
     // 사용자 제보로 혼잡도 상태 갱신(가게가 DB에 없으면 서비스단에서 신규 등록)
     @PostMapping("/updateStatus")
     public ResponseEntity<Void> updateCongestion(@Valid @RequestBody CongestionUpdateDto dto,
-                                                  jakarta.servlet.http.HttpServletRequest request){
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                  Authentication authentication){
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -71,8 +72,8 @@ public class CongestionController {
 
     // 로그인한 사용자가 직접 제보했던 혼잡도 히스토리 조회
     @GetMapping("/history")
-    public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(jakarta.servlet.http.HttpServletRequest request){
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<List<MyCongestionResponseDto>> getMyHistory(Authentication authentication){
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
 
         if(userIdx == null){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

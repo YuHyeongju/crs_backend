@@ -14,6 +14,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import static com.hyeongju.crs.crs.controller.TestAuth.authentication;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.BDDMockito.given;
@@ -42,7 +44,7 @@ class RewardControllerTest {
     void getBalance_success() throws Exception {
         given(rewardService.getBalance(1)).willReturn(700);
 
-        mockMvc.perform(get("/api/rewards/balance/1").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/rewards/balance/1").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balance").value(700));
     }
@@ -61,7 +63,7 @@ class RewardControllerTest {
     void getBalance_usesAuthenticatedUserIdx() throws Exception {
         given(rewardService.getBalance(1)).willReturn(500);
 
-        mockMvc.perform(get("/api/rewards/balance/999").requestAttr("authenticatedUserIdx", 1))
+        mockMvc.perform(get("/api/rewards/balance/999").with(authentication(new TestingAuthenticationToken(1, null))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.balance").value(500));
 

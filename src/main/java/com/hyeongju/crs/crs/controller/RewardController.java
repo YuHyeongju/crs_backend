@@ -2,10 +2,10 @@ package com.hyeongju.crs.crs.controller;
 
 import com.hyeongju.crs.crs.dto.RewardBalanceResponseDto;
 import com.hyeongju.crs.crs.service.RewardService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,9 +18,9 @@ public class RewardController {
 
     @GetMapping("/balance/{userIdx}")
     public ResponseEntity<RewardBalanceResponseDto> getBalance(@PathVariable("userIdx") int userIdx,
-                                                                HttpServletRequest request) {
+                                                                Authentication authentication) {
         // 로그인한 유저 본인의 포인트 잔액 조회 API
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

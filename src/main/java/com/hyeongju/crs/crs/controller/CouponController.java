@@ -4,11 +4,11 @@ import com.hyeongju.crs.crs.dto.CouponRequestDto;
 import com.hyeongju.crs.crs.dto.CouponResponseDto;
 import com.hyeongju.crs.crs.dto.MyCouponResponseDto;
 import com.hyeongju.crs.crs.service.CouponService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +25,8 @@ public class CouponController {
 
     // 쿠폰 등록
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody CouponRequestDto dto, HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<String> register(@Valid @RequestBody CouponRequestDto dto, Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -46,8 +46,8 @@ public class CouponController {
     // 내 가게 쿠폰 목록
     @GetMapping("/my-store/{merchantUserIdx}")
     public ResponseEntity<List<CouponResponseDto>> myStoreCoupons(@PathVariable("merchantUserIdx") int merchantUserIdx,
-                                                                   HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                                   Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -59,8 +59,8 @@ public class CouponController {
     public ResponseEntity<String> update(@PathVariable("couponIdx") int couponIdx,
                                          @RequestParam("merchantUserIdx") int merchantUserIdx,
                                          @Valid @RequestBody CouponRequestDto dto,
-                                         HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                         Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -80,8 +80,8 @@ public class CouponController {
     @PostMapping("/delete/{couponIdx}")
     public ResponseEntity<String> delete(@PathVariable("couponIdx") int couponIdx,
                                          @RequestParam("merchantUserIdx") int merchantUserIdx,
-                                         HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                         Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -113,8 +113,8 @@ public class CouponController {
     @PostMapping("/{couponIdx}/redeem")
     public ResponseEntity<String> redeem(@PathVariable("couponIdx") int couponIdx,
                                          @RequestParam("userIdx") int userIdx,
-                                         HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                         Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
@@ -131,8 +131,8 @@ public class CouponController {
     // 보유 쿠폰 목록
     @GetMapping("/my/{userIdx}")
     public ResponseEntity<List<MyCouponResponseDto>> myCoupons(@PathVariable("userIdx") int userIdx,
-                                                                HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                                Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -143,8 +143,8 @@ public class CouponController {
     @PostMapping("/use/{userCouponIdx}")
     public ResponseEntity<String> use(@PathVariable("userCouponIdx") int userCouponIdx,
                                       @RequestParam("userIdx") int userIdx,
-                                      HttpServletRequest request) {
-        Integer authedUserIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                      Authentication authentication) {
+        Integer authedUserIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (authedUserIdx == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }

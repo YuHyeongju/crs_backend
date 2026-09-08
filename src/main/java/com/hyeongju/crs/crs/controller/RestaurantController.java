@@ -6,12 +6,12 @@ import com.hyeongju.crs.crs.dto.RestaurantPinDto;
 import com.hyeongju.crs.crs.dto.RestaurantRequestDto;
 import com.hyeongju.crs.crs.dto.RestaurantResponseDto;
 import com.hyeongju.crs.crs.service.RestaurantService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,8 +40,8 @@ public class RestaurantController {
     public ResponseEntity<?> registerRestaurant(@Valid @RequestPart("dto") RestaurantRequestDto dto,
                                                 @RequestPart(value = "menuImages", required = false)
                                                 List<MultipartFile> menuImages,
-                                                HttpServletRequest request) throws IOException {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                                Authentication authentication) throws IOException {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
@@ -54,8 +54,8 @@ public class RestaurantController {
 
     // 로그인한 상인 본인이 등록한 가게 목록 조회
     @GetMapping("/my-restaurant-list")
-    public ResponseEntity<?> getMyRestaurants(HttpServletRequest request) {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<?> getMyRestaurants(Authentication authentication) {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         List<RestaurantResponseDto> myRestaurants = restaurantService.getMyRestaurants(userIdx);
@@ -102,8 +102,8 @@ public class RestaurantController {
 
     // 상인이 본인 가게 정보를 수정 화면에서 불러올 때 사용(수정 폼 초기값)
     @GetMapping("/edit/{restIdx}")
-    public ResponseEntity<?> getRestaurantForEdit(@PathVariable("restIdx") int restIdx, HttpServletRequest request) {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<?> getRestaurantForEdit(@PathVariable("restIdx") int restIdx, Authentication authentication) {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
@@ -121,8 +121,8 @@ public class RestaurantController {
                                               @Valid @RequestPart("dto") RestaurantRequestDto dto,
                                               @RequestPart(value = "menuImages", required = false)
                                               List<MultipartFile> menuImages,
-                                              HttpServletRequest request) throws IOException {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+                                              Authentication authentication) throws IOException {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
@@ -137,8 +137,8 @@ public class RestaurantController {
 
     // 가게 삭제(연관된 메뉴 사진 파일까지 함께 정리) - 본인이 등록한 가게인지 확인 후 삭제
     @PostMapping("/delete/{restIdx}")
-    public ResponseEntity<String> deleteRestaurant(@PathVariable("restIdx") int restIdx, HttpServletRequest request) {
-        Integer userIdx = (Integer) request.getAttribute("authenticatedUserIdx");
+    public ResponseEntity<String> deleteRestaurant(@PathVariable("restIdx") int restIdx, Authentication authentication) {
+        Integer userIdx = authentication != null ? (Integer) authentication.getPrincipal() : null;
         if (userIdx == null)
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         try {
