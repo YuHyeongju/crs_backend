@@ -1,6 +1,7 @@
 package com.hyeongju.crs.crs.config;
 
 import com.hyeongju.crs.crs.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +13,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -80,9 +83,35 @@ public class SecurityConfig {
 
                         .anyRequest().authenticated()
                 )
+                // 인증/인가 실패 응답을 다른 API 에러들과 같은 포맷(GlobalExceptionHandler)에 맞춤.
+                // 이 예외들은 DispatcherServlet 이전 필터 체인에서 던져져 @RestControllerAdvice로 못 넘어가므로 여기서 직접 처리
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(authenticationEntryPoint())
+                        .accessDeniedHandler(accessDeniedHandler())
+                )
                 // 스프링 시큐리티 기본 폼로그인 필터보다 먼저 JWT 필터가 실행되도록 순서 지정
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        // 인증 안 된 요청이 보호된 경로에 접근했을 때(401)
+        return (request, response, authException) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("text/plain;charset=UTF-8");
+            response.getWriter().write("로그인이 필요합니다.");
+        };
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        // 인증은 됐지만 권한이 부족할 때(403) - 예: USER가 /api/admins/** 접근
+        return (request, response, accessDeniedException) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("text/plain;charset=UTF-8");
+            response.getWriter().write("접근 권한이 없습니다.");
+        };
     }
 
     @Bean

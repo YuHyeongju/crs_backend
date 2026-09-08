@@ -3,6 +3,8 @@ package com.hyeongju.crs.crs.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +15,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
     // JWT 액세스 토큰 발급/검증 유틸 (로그인 성공 시 AuthService/AuthController에서 호출)
+
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
     @Value("${app.jwtSecret}")
     private String jwtSecret;
@@ -40,6 +44,8 @@ public class JwtUtil {
             Jwts.parser().verifyWith(getKey()).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
+            // 원인(만료/서명불일치/형식오류 등)을 구분해 로그로 남김 - 토큰 원문은 남기지 않음
+            log.debug("JWT 검증 실패: {} - {}", e.getClass().getSimpleName(), e.getMessage());
             return false;
         }
     }
