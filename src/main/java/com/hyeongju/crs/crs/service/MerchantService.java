@@ -40,7 +40,7 @@ public class MerchantService extends AbstractRegistrationService {
 
     }
     private boolean isVaildBussinessNumber(String businessNum){
-        return businessNum != null && businessNum.length() == 10; // 하이픈 포함 10자리("123-45-67890")인지만 간단히 체크
+        return businessNum != null && businessNum.length() == 12; // 하이픈 포함 12자리("123-45-67890")인지만 간단히 체크 — 형식 자체는 DTO의 @Pattern에서 이미 검증됨
     }
 
     public MypageResponseDto getMerchantProfile(int userIdx){

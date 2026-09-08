@@ -1,13 +1,11 @@
 package com.hyeongju.crs.crs.service;
 
 import com.hyeongju.crs.crs.domain.RefreshToken;
-import com.hyeongju.crs.crs.domain.RoleName;
 import com.hyeongju.crs.crs.domain.User;
 import com.hyeongju.crs.crs.dto.AdminRegistractionDto;
 import com.hyeongju.crs.crs.dto.MerchantRegistractionDto;
 import com.hyeongju.crs.crs.dto.UserRegistractionDto;
 import com.hyeongju.crs.crs.repository.RefreshTokenRepository;
-import com.hyeongju.crs.crs.repository.RoleRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import com.hyeongju.crs.crs.security.JwtUtil;
 import jakarta.transaction.Transactional;
@@ -24,14 +22,16 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     // 로그인/로그아웃, 회원가입(중복확인 포함), 리프레시 토큰 발급/갱신/삭제, 회원 탈퇴 등 인증 전반을 담당하는 서비스
-    // 주의: UserService/MerchantService/AdminService에도 회원가입 로직이 각각 있는데,
-    // 이 클래스는 AbstractRegistrationService를 상속받지 않고 동일한 로직을 직접 구현하고 있음(중복 로직)
+    // 회원가입 자체의 필드 세팅/저장 로직은 UserService/MerchantService/AdminService(AbstractRegistrationService 상속)에
+    // 위임하고, 이 클래스는 컨트롤러에서 넘어온 중복확인/인증/토큰 관련 책임만 담당함
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
+    private final UserService userService;
+    private final MerchantService merchantService;
+    private final AdminService adminService;
 
     // 회원가입 폼의 아이디/전화번호/사업자번호/관리자번호 중복 확인용
     public boolean existsById(String id) {
@@ -52,52 +52,20 @@ public class AuthService {
 
     @Transactional
     public void registerUser(UserRegistractionDto dto) {
-        // 일반 유저 회원가입
-        String encodePassword = passwordEncoder.encode(dto.getPw());
-        User user = new User();
-        user.setId(dto.getId());
-        user.setPw(encodePassword);
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPhNum(dto.getPhone());
-        user.setGender(dto.getGender());
-        user.setCreateTime(LocalDateTime.now());
-        user.setRole(getRoleByName(RoleName.USER));
-        userRepository.save(user);
+        // 일반 유저 회원가입 — 실제 생성/저장은 UserService(AbstractRegistrationService)에 위임
+        userService.registerUser(dto);
     }
 
     @Transactional
     public void registerMerchant(MerchantRegistractionDto dto) {
-        // 상인 회원가입
-        String encodePassword = passwordEncoder.encode(dto.getPw());
-        User user = new User();
-        user.setId(dto.getId());
-        user.setPw(encodePassword);
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPhNum(dto.getPhone());
-        user.setGender(dto.getGender());
-        user.setBusinessNum(dto.getBusinessNum());
-        user.setCreateTime(LocalDateTime.now());
-        user.setRole(getRoleByName(RoleName.MERCHANT));
-        userRepository.save(user);
+        // 상인 회원가입 — 실제 생성/저장은 MerchantService(AbstractRegistrationService)에 위임
+        merchantService.registerMerchant(dto);
     }
 
     @Transactional
     public void registerAdmin(AdminRegistractionDto dto) {
-        // 관리자 회원가입
-        String encodePassword = passwordEncoder.encode(dto.getPw());
-        User user = new User();
-        user.setId(dto.getId());
-        user.setPw(encodePassword);
-        user.setName(dto.getName());
-        user.setEmail(dto.getEmail());
-        user.setPhNum(dto.getPhone());
-        user.setGender(dto.getGender());
-        user.setAdminNum(dto.getAdminNum());
-        user.setCreateTime(LocalDateTime.now());
-        user.setRole(getRoleByName(RoleName.ADMIN));
-        userRepository.save(user);
+        // 관리자 회원가입 — 실제 생성/저장은 AdminService(AbstractRegistrationService)에 위임
+        adminService.registerAdmin(dto);
     }
 
     public User authenticate(String id, String rawPassword) {
@@ -170,15 +138,5 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 사용자 입니다."));
         user.setStatus("WITHDRAWN");
         userRepository.save(user);
-    }
-
-    private com.hyeongju.crs.crs.domain.Role getRoleByName(RoleName roleName) {
-        // roleName에 해당하는 Role을 조회, 없으면 새로 생성
-        return roleRepository.findByRoleName(roleName)
-                .orElseGet(() -> {
-                    com.hyeongju.crs.crs.domain.Role newRole = new com.hyeongju.crs.crs.domain.Role();
-                    newRole.setRoleName(roleName);
-                    return roleRepository.save(newRole);
-                });
     }
 }
