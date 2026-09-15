@@ -13,6 +13,8 @@ import com.hyeongju.crs.crs.repository.ReviewRepository;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RestaurantService {
     // 식당 등록/수정/조회/삭제, 메뉴·편의시설 관리, 지도 핀 데이터 제공 등 식당 관련 핵심 로직을 모아둔 서비스
+
+    private static final Logger log = LoggerFactory.getLogger(RestaurantService.class);
 
     private final RestaurantRepository restaurantRepository;
     private final UserRepository userRepository;
@@ -154,8 +158,7 @@ public class RestaurantService {
             for (RestaurantRequestDto.MenuList menuDto : dto.getMenulist()) {
                 RestaurantMenu menu = new RestaurantMenu();
 
-                System.out.println(">>> 메뉴 이름: " + menuDto.getMenuName());
-                System.out.println(">>> 메뉴 가격: " + menuDto.getMenuPrice());
+                log.debug("메뉴 이름: {}, 가격: {}", menuDto.getMenuName(), menuDto.getMenuPrice());
 
                 menu.setMenuName(menuDto.getMenuName());
                 menu.setMenuPrice(menuDto.getMenuPrice());
@@ -488,9 +491,9 @@ public class RestaurantService {
         File file = new File(uploadPath + fileName);
         if(file.exists()){
             if(file.delete()){
-                System.out.println("파일 삭제 완료" + fileName);
+                log.debug("파일 삭제 완료: {}", fileName);
             }else{
-                System.out.println("파일 삭제 실패" + fileName);
+                log.warn("파일 삭제 실패: {}", fileName);
             }
         }
     }

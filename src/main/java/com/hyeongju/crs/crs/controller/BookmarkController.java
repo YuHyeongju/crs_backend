@@ -5,6 +5,8 @@ import com.hyeongju.crs.crs.dto.BookMarkDto;
 import com.hyeongju.crs.crs.repository.UserRepository;
 import com.hyeongju.crs.crs.service.BookmarkService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,8 @@ import java.util.List;
 public class BookmarkController {
     // 북마크 등록/해제(토글) 및 조회 API
     // 다른 컨트롤러와 달리 UserRepository를 직접 주입받아 사용(서비스 계층을 한 번 더 거치지 않음)
+
+    private static final Logger log = LoggerFactory.getLogger(BookmarkController.class);
 
     private final UserRepository userRepository;
     private final BookmarkService bookMarkService;
@@ -35,9 +39,9 @@ public class BookmarkController {
         String result = bookMarkService.toggleBookMark(user, dto); // "add" 또는 "delete" 문자열로 결과 반환
 
         if("add".equals(result)) {
-            System.out.println("즐겨찾기 추가");
+            log.debug("즐겨찾기 추가");
         }else if("delete".equals(result)){
-            System.out.println("즐겨찾기 해제");
+            log.debug("즐겨찾기 해제");
             }
 
         return ResponseEntity.ok(result);
@@ -51,16 +55,15 @@ public class BookmarkController {
         if (authedUserIdx == null) {
             return ResponseEntity.status(401).build();
         }
-        System.out.println("====== [북마크 조회 요청] userIdx: " + authedUserIdx + " ======");
+        log.debug("북마크 조회 요청: userIdx={}", authedUserIdx);
         // 경로변수 userIdx는 사용되지 않음 — 실제 조회는 토큰의 authedUserIdx 기준
 
         List<String> bookmarkIds = bookMarkService.getBookmarkKakaoIds(authedUserIdx);
 
         if (bookmarkIds == null || bookmarkIds.isEmpty()) {
-            System.out.println(">>> 결과: 즐겨찾기 목록이 비어있습니다.");
+            log.debug("북마크 조회 결과: 즐겨찾기 목록이 비어있습니다.");
         } else {
-            System.out.println(">>> 결과: " + bookmarkIds.size() + "개의 아이디를 찾았습니다.");
-            System.out.println(">>> 데이터: " + bookmarkIds);
+            log.debug("북마크 조회 결과: {}개, 데이터={}", bookmarkIds.size(), bookmarkIds);
         }
 
         return ResponseEntity.ok(bookmarkIds);
@@ -76,7 +79,7 @@ public class BookmarkController {
 
         List<BookMarkDto> bookmarkDetails = bookMarkService.getBookmarkListForMypage(userIdx);
 
-        System.out.println("즐겨찾기한 가게 수: " + bookmarkDetails.size());
+        log.debug("즐겨찾기한 가게 수: {}", bookmarkDetails.size());
 
         return ResponseEntity.ok(bookmarkDetails);
     }

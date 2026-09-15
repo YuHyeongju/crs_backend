@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -23,15 +25,15 @@ import java.util.Map;
 
 public class CongestionController {
 
+    private static final Logger log = LoggerFactory.getLogger(CongestionController.class);
+
     private final CongestionService congestionService;
 
     // 카카오맵 가게 ID 기준 현재 혼잡도 단건 조회
     @GetMapping("/{kakaoId}")
     public ResponseEntity<String> getCurrentCongestion(@PathVariable("kakaoId") String kakaoId){
         String currentStatus = congestionService.getCurrentcongestion(kakaoId);
-        System.out.println("===================================================");
-        System.out.println("단일 가게 혼잡도 조회 완료");
-        System.out.println("===================================================");
+        log.debug("단일 가게 혼잡도 조회 완료: kakaoId={}", kakaoId);
         return ResponseEntity.ok(currentStatus);
     }
 
@@ -44,9 +46,7 @@ public class CongestionController {
     // 지도에 표시된 여러 가게의 혼잡도를 한 번에 조회(카카오ID 목록 → 상태 맵)
     @PostMapping("/bulkStatus")
     public ResponseEntity<Map<String, String>> getCurrentCongstionAll(@RequestBody List<String> kakaoIds){
-        System.out.println("==========================================================");
-        System.out.println("전체 가게 혼잡도 조회 완료 ");
-        System.out.println("==========================================================");
+        log.debug("전체 가게 혼잡도 조회 완료: {}건 요청", kakaoIds.size());
         return ResponseEntity.ok(congestionService.getAllCurrentCongestion(kakaoIds));
     }
 
@@ -59,14 +59,10 @@ public class CongestionController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         dto.setUserIdx(authedUserIdx);
-        System.out.println("전달 받은 카카오 ID: " + dto.getKakaoId());
-        System.out.println("전달 받은 혼잡도 상태: " + dto.getCongStatus());
-        System.out.println("전달 받은 userIdx: " + dto.getUserIdx());
-        System.out.println("전달 받은 식당 이름: " + dto.getRestName());
-        System.out.println("전달 받은 식당 주소: " + dto.getRestAddress());
-        System.out.println("전달 받은 식당 전화번호: " + dto.getRestPhone());
+        log.debug("혼잡도 제보 요청: kakaoId={}, congStatus={}, userIdx={}, restName={}, restAddress={}, restPhone={}",
+                dto.getKakaoId(), dto.getCongStatus(), dto.getUserIdx(), dto.getRestName(), dto.getRestAddress(), dto.getRestPhone());
         congestionService.changeCongStatus(dto);
-        System.out.println("혼잡도 상태 업데이트 완료");
+        log.debug("혼잡도 상태 업데이트 완료");
         return ResponseEntity.ok().build();
     }
 

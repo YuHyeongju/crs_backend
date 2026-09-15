@@ -7,6 +7,8 @@ import com.hyeongju.crs.crs.dto.BookMarkDto;
 import com.hyeongju.crs.crs.repository.BookMarkRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookmarkService {
     // 북마크 등록/해제(토글) 및 조회를 담당하는 서비스
+    private static final Logger log = LoggerFactory.getLogger(BookmarkService.class);
+
     private final BookMarkRepository bookMarkRepository;
     private final RestaurantService restaurantService;
 
@@ -25,7 +29,7 @@ public class BookmarkService {
     public String toggleBookMark(User user, BookMarkDto dto){
         // 이미 북마크되어 있으면 해제(delete), 아니면 새로 등록(add) — 하나의 API로 두 동작을 겸함
 
-        System.out.println(">>> [북마크] kakaoId=" + dto.getKakaoId() + " restIdx=" + dto.getRestIdx());
+        log.debug("북마크 토글: kakaoId={}, restIdx={}", dto.getKakaoId(), dto.getRestIdx());
 
         Restaurant newRestaurant;
         if (dto.getRestIdx() != null) {

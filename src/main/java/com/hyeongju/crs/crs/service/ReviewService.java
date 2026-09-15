@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,8 @@ import java.util.stream.Collectors;
 public class ReviewService {
     // 리뷰 작성/조회/수정/삭제 및 리뷰 신고 처리를 담당하는 서비스
 
+    private static final Logger log = LoggerFactory.getLogger(ReviewService.class);
+
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final RestaurantRepository restaurantRepository;
@@ -39,8 +43,7 @@ public class ReviewService {
     public List<ReviewResponseDto> getReviewsByRestaurant(int restIdx){
         // 특정 식당의 ACTIVE 리뷰를 최신순으로 조회해서 응답 DTO 리스트로 변환
         List<Review> reviews = reviewRepository.findByRestaurant_RestIdxOrderByReviewAtDesc(restIdx);
-        System.out.println("리뷰 가져오기 성공");
-        System.out.println("가져온 리뷰 개수: " +  reviews.size() + "개");
+        log.debug("리뷰 가져오기 성공: {}개", reviews.size());
 
         return reviews.stream().map(ReviewResponseDto :: new).collect(Collectors.toList());
     }
